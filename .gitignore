@@ -1,0 +1,36 @@
+# Ignore Visual Studio user-specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug*/
+[Rr]elease*/
+x64/
+x86/
+build/
+
+# Compiled object / binary files
+*.obj
+*.exe
+*.pdb
+*.idb
+*.dll
+*.lib
+*.app
+*.out
+
+# Cache / temporary files
+*.opendb
+*.VC.db
+*.VC.opendb
+*.log
+*.tlog
+
+# OS files
+.DS_Store
+Thumbs.db
