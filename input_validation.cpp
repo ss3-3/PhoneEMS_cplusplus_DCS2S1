@@ -827,6 +827,52 @@ string getValidEmailAddress(const string& prompt) {
     }
 }
 
+// Check password format
+string getValidPassword(const string& prompt) {
+    string password = "";
+    regex pattern1("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,20}$"); //check whether fulfill the format or not
+
+    while (true)
+    {
+        cout << prompt;
+        cin >> password;
+
+        //Check whether user enter '0' or not
+        if (password == "0")
+        {
+            if (getExit())
+            {
+                return ""; //empty value string
+            }
+            continue;
+        }
+
+        if (password.empty()) {
+            cout << "Error: Password cannot be empty." << endl;
+            continue;
+        }
+
+        if (password.size() < 8 || password.size() > 20)
+        {
+            cout << "Error: Password is invalid! " << endl;
+            cout << "Please make sure no less than 8 and more than 20 characters" << endl;
+            continue;
+        }
+
+        if (regex_match(password, pattern1))
+        {
+            return password;
+        }
+        else
+        {
+            cout << "Error: Password wrong format. Kindly try again! " << endl;
+            cout << "Error: Password must include at least one uppercase letter, one lowercase letter, and one digit." << endl;
+        }
+
+    }
+}
+
+
 string getValidEventStatus(const string& prompt) {
     string validStatuses[] = { "REGISTERED", "APPROVED", "REJECTED" };
     int numStatuses = 3;

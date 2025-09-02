@@ -227,7 +227,7 @@ void createEventRegistration(SystemData& data) {
         return;
     }
 
-    newReg.eventStatus = "Registered";
+    newReg.eventStatus = "UNSCHEDULED";
 
     //Ensure all required fields are valid before adding to vector
     if (newReg.eventID.empty() || newReg.eventTitle.empty() || newReg.manufacturer.empty()) {
@@ -511,7 +511,7 @@ void updateEventRegistration(SystemData& data) {
     cout << "5. Description" << endl;
     cout << "6. Maximum Participants" << endl;
     cout << "7. Estimated Budget" << endl;
-    cout << "8. Status" << endl;
+    cout << "8. Cancel Modify" << endl;
 
     int choice = getValidIntegerInput("Enter choice [1-8]: ", 1, 8);
 
@@ -549,8 +549,6 @@ void updateEventRegistration(SystemData& data) {
         regPtr->estimatedBudget = getValidDoubleInput("Enter new Estimated Budget (RM): ");
         break;
     case 8:
-        cout << "Status options: Registered, Approved, Rejected" << endl;
-        regPtr->eventStatus = getValidStringInput("Enter new Status: ");
         break;
     }
 
@@ -606,7 +604,7 @@ void deleteEventRegistration(SystemData& data) {
     }
 
     // Check if event is already cancelled
-    if (data.registrations[regIndex].eventStatus == "Cancelled") {
+    if (data.registrations[regIndex].eventStatus == "CANCELLED") {
         cout << "This event is already cancelled!" << endl;
         return;
     }
@@ -622,7 +620,7 @@ void deleteEventRegistration(SystemData& data) {
     vector<int> affectedBookings;
     for (size_t i = 0; i < data.bookings.size(); i++) {
         if (data.bookings[i].eventReg.eventID == eventID &&
-            data.bookings[i].bookingStatus != "Cancelled") {
+            data.bookings[i].bookingStatus != "CANCELLED") {
             affectedBookings.push_back(i);
         }
     }
@@ -631,7 +629,7 @@ void deleteEventRegistration(SystemData& data) {
     if (!affectedBookings.empty()) {
         cout << "\nWARNING: This event has " << affectedBookings.size() << " active booking(s)!" << endl;
         cout << "Cancelling this event will automatically cancel all active bookings." << endl;
-        cout << "Affected users will see their bookings as 'Cancelled'." << endl;
+        cout << "Affected users will see their bookings as 'CANCELLED'." << endl;
     }
 
     vector<char> validChars = { 'Y', 'N' };
@@ -639,12 +637,12 @@ void deleteEventRegistration(SystemData& data) {
 
     if (confirm == 'Y' || confirm == 'y') {
         // Cancel the event registration
-        data.registrations[regIndex].eventStatus = "Cancelled";
+        data.registrations[regIndex].eventStatus = "CANCELLED";
 
         // Cancel all active bookings for this event
         int cancelledBookings = 0;
         for (int bookingIndex : affectedBookings) {
-            data.bookings[bookingIndex].bookingStatus = "Cancelled";
+            data.bookings[bookingIndex].bookingStatus = "CANCELLED";
             cancelledBookings++;
         }
 

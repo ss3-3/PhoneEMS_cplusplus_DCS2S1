@@ -21,7 +21,7 @@ string getCurrentUserName(const SystemData& data);
 int main() {
     SystemData data;
     
-    bool exitProgram = false;
+    bool exitProgram = false, loginValidation = false;
 
     while (!exitProgram) {
         clearScreen();
@@ -41,7 +41,8 @@ int main() {
             pauseScreen();
             break;
         case 2:
-            if (loginUser(data)) {  // If login successful
+            loginUser(data, &loginValidation);
+            if (loginValidation) {  // If login successful
                 cout << "Login successful! Loading your data..." << endl;
                 pauseScreen();
 

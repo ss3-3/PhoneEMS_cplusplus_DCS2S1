@@ -8,6 +8,8 @@
 #include <sstream>
 #include <cstdlib>
 #include <regex>
+#include <cstring>
+#include <cctype>
 #include "date.h"
 #include "venue.h"
 #include "event_registration.h"
@@ -23,25 +25,47 @@
 using namespace std;
 
 void signUp(SystemData& data) {
+    string password = "", password2 = "";
+    bool validation = false;
+
     Organizer currentUser;
     //need loop to ask user enter a valid userID
-    currentUser.userID = getValidStringInputWithExit("Enter Username (unique): ");
-    if (currentUser.userID.empty())
-    {
-        confirmExit();
-        return;
-    }
+    cout << "\t === REGISTER AN NEW ACCOUNT ===" << endl;
+    // Generate unique event ID
+    currentUser.userID = generateUserID(data.organizer);
+    cout << "Your User ID: " << currentUser.userID << endl;
+
+    // Name
     if (IsIdDuplicate(currentUser.userID)) { //check from the file
         cout << "This name has already been taken" << endl;
     }
-    currentUser.password = getValidStringInputWithExit("Enter Password: ");
-    if (currentUser.password.empty())
+    currentUser.organizerName = getValidStringInputWithExit("Enter your Name: ");
+    if (currentUser.organizerName.empty())
     {
         confirmExit();
         return;
     }
-    currentUser.organizerName = getValidStringInputWithExit("Enter Organizer Name: ");
-    if (currentUser.organizerName.empty())
+    currentUser.age = getValidIntegerInputWithExit("Enter your age: ", 18, 100);
+    if (currentUser.age < 18 || currentUser.age >= 100)
+    {
+        // only accept 18 to 100 years old
+        cout << "Warning: The user age must be 18 to 100 years old [Invalid age]" << endl;
+    }
+    if (currentUser.age == -1)
+    {
+        confirmExit();
+        return;
+    }
+    // manufacturer
+    currentUser.manufacturer = getValidStringInputWithExit("Enter Manufacturer/OEM: ");
+    if (currentUser.manufacturer == "")
+    {
+        confirmExit(); //show the exit message
+        return; //back to previous
+    }
+    // Position
+    currentUser.position = getValidStringInputWithExit("Enter your position: ");
+    if (currentUser.position.empty())
     {
         confirmExit();
         return;
@@ -58,12 +82,37 @@ void signUp(SystemData& data) {
         confirmExit();
         return;
     }
-    currentUser.position = getValidStringInput("Enter your position: ");
-    if (currentUser.position.empty())
+
+    // Password
+    while (!validation)
     {
-        confirmExit();
-        return;
+        password = getValidPassword("Enter your password (must contain at least one uppercase letter, lowercase letter and number) \n-> New Password: ");
+
+        if (password == "")
+        {
+            confirmExit();
+            return;
+        }
+
+        password2 = getValidPassword("-> Re-type new Password: ");
+        if (password2 == "")
+        {
+            confirmExit();
+            return;
+        }
+        // Matching password validation
+        if (password != password2)
+        {
+            cout << "Error: The first password does not match the second password!" << endl;
+            cout << "Please try again! " << endl;
+        }
+        else
+        {
+            strcpy_s(currentUser.password, password.c_str()); //assign string value in char array
+            validation = true; //exit loop
+        }
     }
+
     cout << "==========================" << endl;
     cout << "  Register Successfully  " << endl;
     cout << "==========================" << endl;
@@ -73,22 +122,33 @@ void signUp(SystemData& data) {
     data.currentUser = currentUser.userID;
 }
 
-bool loginUser(SystemData& data) {
+void loginUser(SystemData& data, bool *validation) {
     clearScreen();
     cout << "=== USER LOGIN ===" << endl;
     cout << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
 
-    string userID = getValidStringInput("Enter User ID: ");
-    string password = getValidStringInput("Enter Password: ");
+    string userID = getValidStringInputWithExit("Enter User ID or Email: ");
 
-    // Normalize input for comparison
-    string normalizedInputID = normalizeUserID(userID);
+    if (userID.empty())
+    {
+        confirmExit();
+        return;
+    }
+    string password = getValidStringInputWithExit("Enter Password: ");
+    if (password.empty())
+    {
+        confirmExit();
+        return;
+    }
+
+    //// Normalize input for comparison
+    //string normalizedInputID = normalizeUserID(userID);
 
     // Find user with normalized comparison
     for (auto& user : data.organizer) {
-        string normalizedStoredID = normalizeUserID(user.userID);
+        //string normalizedStoredID = normalizeUserID(user.userID);
 
-        if (normalizedStoredID == normalizedInputID && user.password == password) {
+        if ((user.userID == userID || user.organizerEmail == userID) && (password == user.password)) {
             user.isLoggedIn = true;
 
             // CRITICAL: Store the ORIGINAL userID from file, not the input
@@ -128,12 +188,14 @@ bool loginUser(SystemData& data) {
             //cout << "==================" << endl;
 
             saveUsersToFile(data.organizer);
-            return true;
+            *validation = true;
+            return;
         }
     }
 
-    cout << "Invalid User ID or Password!" << endl;
-    return false;
+    cout << "Invalid User ID or Password! \nTips: Enter your User ID with capital letter. " << endl;
+    *validation = false;
+    return;
 }
 
 bool IsIdDuplicate(const string& userID) {
@@ -153,10 +215,17 @@ void displayUserInfo(const Organizer& organizer) {
     cout << "    USER INFORMATION      " << endl;
     cout << "==========================" << endl;
     cout << "User ID       : " << organizer.userID << endl;
-    cout << "Password      : " << string(organizer.password.length(), '*') << endl;
     cout << "Name          : " << organizer.organizerName << endl;
+    cout << "Age           : " << organizer.age << endl;
+    cout << "Password      : ";
+    int len = strlen(organizer.password); // get the length of the password
+    for (int i = 0; i < len; i++) {
+        cout << '*';
+    }
+    cout << endl;
     cout << "Contact       : " << organizer.organizerContact << endl;
     cout << "Email         : " << organizer.organizerEmail << endl;
+    cout << "Manufacturer  : " << organizer.manufacturer << endl;
     cout << "Position      : " << organizer.position << endl;
     cout << "Login Status  : " << (organizer.isLoggedIn ? "Logged In" : "Logged Out") << endl;
     cout << "==========================" << endl;
@@ -201,15 +270,15 @@ void viewUserProfile(SystemData& data) {
     // Count user's registrations by status
     int totalRegistrations = 0;
     int pendingRegistrations = 0;
-    int approvedRegistrations = 0;
+    int scheduledRegistrations = 0;
     int rejectedRegistrations = 0;
 
     for (const auto& reg : data.registrations) {
         if (reg.organizer.userID == data.currentUser) {
             totalRegistrations++;
-            if (reg.eventStatus == "Pending") pendingRegistrations++;
-            else if (reg.eventStatus == "Approved" || reg.eventStatus == "Registered") approvedRegistrations++;
-            else if (reg.eventStatus == "Rejected") rejectedRegistrations++;
+            if (reg.eventStatus == "UNSCHEDULED") pendingRegistrations++;
+            else if (reg.eventStatus == "SCHEDULED" || reg.eventStatus == "REGISTERED") scheduledRegistrations++;
+            else if (reg.eventStatus == "CANCELLED") rejectedRegistrations++;
         }
     }
 
@@ -255,7 +324,7 @@ void viewUserProfile(SystemData& data) {
     cout << "\n--- EVENT REGISTRATIONS ---" << endl;
     cout << left << setw(20) << "Total Registrations:" << totalRegistrations << endl;
     cout << left << setw(20) << "Pending:" << pendingRegistrations << endl;
-    cout << left << setw(20) << "Approved:" << approvedRegistrations << endl;
+    cout << left << setw(20) << "Approved:" << scheduledRegistrations << endl;
     cout << left << setw(20) << "Rejected:" << rejectedRegistrations << endl;
 
     cout << "\n--- EVENT BOOKINGS ---" << endl;
@@ -328,10 +397,12 @@ void editUserProfile(SystemData& data) {
 
     cout << "\nWhat would you like to edit?" << endl;
     cout << "1. Organizer Name" << endl;
-    cout << "2. Contact Number" << endl;
-    cout << "3. Email Address" << endl;
-    cout << "4. Position" << endl;
-    cout << "5. Cancel" << endl;
+    cout << "2. Age" << endl;
+    cout << "3. Contact Number" << endl;
+    cout << "4. Email Address" << endl;
+    cout << "5. Manufacturer" << endl;
+    cout << "6. Position" << endl;
+    cout << "7. Cancel" << endl;
 
     int choice = getValidIntegerInput("Enter your choice [1-5]: ", 1, 5);
 
@@ -340,15 +411,22 @@ void editUserProfile(SystemData& data) {
         data.organizer[userIndex].organizerName = getValidStringInput("Enter new Organizer Name: ");
         break;
     case 2:
-        data.organizer[userIndex].organizerContact = getValidPhoneNumber("Enter new Contact Number: ");
+        data.organizer[userIndex].age = getValidIntegerInputWithExit("Enter your age: ", 18, 100);
         break;
     case 3:
-        data.organizer[userIndex].organizerEmail = getValidEmailAddress("Enter new Email Address: ");
+        data.organizer[userIndex].organizerContact = getValidPhoneNumber("Enter new Contact Number: ");
         break;
     case 4:
-        data.organizer[userIndex].position = getValidStringInput("Enter new Position: ");
+        data.organizer[userIndex].organizerEmail = getValidEmailAddress("Enter new Email Address: ");
         break;
     case 5:
+        data.organizer[userIndex].position = getValidStringInput("Enter new Position: ");
+        break;
+    case 6:
+        data.organizer[userIndex].position = getValidStringInput("Enter new Position: ");
+        
+        break;
+    case 7:
         cout << "Edit cancelled." << endl;
         return;
     }
@@ -401,7 +479,7 @@ void changeUserPassword(SystemData& data) {
     }
 
     // Update password
-    data.organizer[userIndex].password = newPassword;
+    strcpy_s(data.organizer[userIndex].password, newPassword.c_str());
     saveUsersToFile(data.organizer);
 
     cout << "Password changed successfully!" << endl;

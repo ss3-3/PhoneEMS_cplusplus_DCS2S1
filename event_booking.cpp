@@ -81,13 +81,13 @@ void createEventBooking(SystemData& data) {
     }
 
     // Display approved registrations that belong to current user (exclude cancelled)
-    vector<EventRegistration> userApprovedRegs;
+    vector<EventRegistration*> userApprovedRegs;
     string normalizedCurrentUser = normalizeUserID(data.currentUser);
-    for (const auto& reg : data.registrations) {
+    for (auto& reg : data.registrations) {
         string normalizedRegUser = normalizeUserID(reg.organizer.userID);
-        if ((reg.eventStatus == "Approved" || reg.eventStatus == "Registered") &&
+        if ((reg.eventStatus == "UNSCHEDULED") &&
             normalizedRegUser == normalizedCurrentUser) {
-            userApprovedRegs.push_back(reg);
+            userApprovedRegs.push_back(&reg);
         }
     }
 
@@ -111,22 +111,22 @@ void createEventBooking(SystemData& data) {
     for (size_t i = 0; i < userApprovedRegs.size(); i++) {
         cout << left
             << setw(4) << (i + 1)
-            << setw(8) << userApprovedRegs[i].eventID
-            << setw(15) << userApprovedRegs[i].eventTitle.substr(0, 14)
-            << setw(12) << userApprovedRegs[i].manufacturer.substr(0, 11)
-            << setw(20) << userApprovedRegs[i].organizer.organizerName.substr(0, 19)
-            << setw(12) << userApprovedRegs[i].eventStatus << endl;
+            << setw(8) << userApprovedRegs[i]->eventID
+            << setw(15) << userApprovedRegs[i]->eventTitle.substr(0, 14)
+            << setw(12) << userApprovedRegs[i]->manufacturer.substr(0, 11)
+            << setw(20) << userApprovedRegs[i]->organizer.organizerName.substr(0, 19)
+            << setw(12) << userApprovedRegs[i]->eventStatus<< endl;
     }
     cout << setfill('=') << setw(80) << "=" << setfill(' ') << endl;
 
     int regChoice = getValidIntegerInput("Select registration number: ", 1, static_cast<int>(userApprovedRegs.size()));
-    EventRegistration selectedReg = userApprovedRegs[regChoice - 1];
+    EventRegistration* selectedReg = userApprovedRegs[regChoice - 1];
 
     EventBooking newBooking;
     newBooking.bookingID = generateBookingID(data.bookings);
-    newBooking.eventReg = selectedReg;
+    newBooking.eventReg = *selectedReg;
 
-    cout << "\nSelected Event: " << selectedReg.eventTitle << " by " << selectedReg.manufacturer << endl;
+    cout << "\nSelected Event: " << selectedReg->eventTitle << " by " << selectedReg->manufacturer << endl;
     cout << "Generated Booking ID: " << newBooking.bookingID << endl;
 
     // Get event date
@@ -147,7 +147,7 @@ void createEventBooking(SystemData& data) {
 
     // CHECK FOR DUPLICATE BOOKING
     for (const auto& existingBooking : data.bookings) {
-        if (existingBooking.eventReg.eventID == selectedReg.eventID &&
+        if (existingBooking.eventReg.eventID == selectedReg->eventID &&
             existingBooking.eventDate.day == newBooking.eventDate.day &&
             existingBooking.eventDate.month == newBooking.eventDate.month &&
             existingBooking.eventDate.year == newBooking.eventDate.year &&
@@ -214,6 +214,8 @@ void createEventBooking(SystemData& data) {
     newSlot.eventID = newBooking.bookingID;
     newSlot.isBooked = true;
     data.venues[venueIndex].bookingSchedule.push_back(newSlot);
+
+    selectedReg->eventStatus = "SCHEDULED";
 
     data.bookings.push_back(newBooking);
 
@@ -664,6 +666,12 @@ void cancelEventBooking(SystemData& data) {
         if (confirm == 'Y' || confirm == 'y') {
             // Remove booking from venue schedule
             removeBookingFromVenueSchedule(data.venues, bookingID);
+            for (auto& reg : data.registrations) {
+                if (reg.eventID == data.bookings[bookingIndex].eventReg.eventID && normalizedCurrentUser == data.bookings[bookingIndex].eventReg.organizer.userID) {
+                    reg.eventStatus = "UNSCHEDULED"; //change the event status
+                    break;
+                }
+            }
 
             // Delete the booking completely
             data.bookings.erase(data.bookings.begin() + bookingIndex);

@@ -101,6 +101,11 @@ Date getCurrentDate() {
     return current;
 }
 
+string generateUserID(const vector<Organizer>& user) {
+    int nextNumber = user.size() + 1001;
+    return "USER" + to_string(nextNumber);
+}
+
 string generateEventID(const vector<EventRegistration>& registrations) {
     int nextNumber = registrations.size() + 1001;
     return "EVT" + to_string(nextNumber);

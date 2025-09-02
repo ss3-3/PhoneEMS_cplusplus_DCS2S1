@@ -1,3 +1,2 @@
-EVT1001|manufacturer|title|1|hahaname,hohomodel,10|description|100|10000|Cancelled|siauwei|weiiii|0121231234|siauwei@gmail.com|ceo
-EVT1002|haha|hoho|1|blabla,heihei,200|tak de|200|3000|Registered|siauwei|weiiii|0121231234|siauwei@gmail.com|ceo
-EVT1003|ahahah|lalala|1|blabla,lololo,100|heihei|200|4000|Registered|siauwei|weiiii|0121231234|siauwei@gmail.com|ceo
+EVT1001|HUAWEI|HUAWEI PURA 80 SERIES|1|HUAWEI PURA 80,HWI-P80,2799|HUAWEI PURA 80 SERIES AND EMUI 15.1 SYSTEM|200|3000|SCHEDULED|USER1001|NG KAI ZHE|0123456789|kaizhe8229@gmail.com|CEO
+EVT1002|APPLE|iPhone 17 Series|1|iPhone 17,IP17,3999|iPhone 17 Series and iOS 26|500|5500|CANCELLED|USER1002|ANSON|012-345-6789|anson-apple@apple.com|CEO

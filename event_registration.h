@@ -17,7 +17,7 @@ struct EventRegistration {
     string description;          // describe the event activity
     int expectedGuests;          // how many people attend
     double estimatedBudget;
-    string eventStatus;          // "Registered", "Approved", "Cancelled"
+    string eventStatus;          // "REGISTERED", "SCHEDULED", "UNSCHEDULED"
     Organizer organizer;
 };
 
