@@ -109,23 +109,23 @@ void displayEventSummary(const SystemData& data) {
 
     int totalRegistrations = userRegistrations.size();
     int totalBookings = userBookings.size();
-    int totalVenues = data.venues.size(); // All venues are available for viewing
+    int totalVenues = data.venues.size();
 
-    // Count different statuses for user's events only
-    int registeredCount = 0, approvedCount = 0, rejectedCount = 0;
-    int pendingCount = 0, confirmedCount = 0, completedCount = 0, cancelledCount = 0;
+    // Count different statuses for user's events only - UPDATED STATUSES
+    int scheduledCount = 0, unscheduledCount = 0, cancelledCount = 0;
+    int pendingCount = 0, confirmedCount = 0, completedCount = 0, bookingCancelledCount = 0;
 
     for (const auto& reg : userRegistrations) {
-        if (reg.eventStatus == "Registered") registeredCount++;
-        else if (reg.eventStatus == "Approved") approvedCount++;
-        else if (reg.eventStatus == "Rejected") rejectedCount++;
+        if (reg.eventStatus == "SCHEDULED") scheduledCount++;
+        else if (reg.eventStatus == "UNSCHEDULED") unscheduledCount++;
+        else if (reg.eventStatus == "CANCELLED") cancelledCount++;
     }
 
     for (const auto& booking : userBookings) {
         if (booking.bookingStatus == "Pending") pendingCount++;
         else if (booking.bookingStatus == "Confirmed") confirmedCount++;
         else if (booking.bookingStatus == "Completed") completedCount++;
-        else if (booking.bookingStatus == "Cancelled") cancelledCount++;
+        else if (booking.bookingStatus == "Cancelled") bookingCancelledCount++;
     }
 
     cout << format("User: {}\n", data.currentUser);
@@ -136,16 +136,16 @@ void displayEventSummary(const SystemData& data) {
     cout << endl;
 
     cout << "=== MY REGISTRATION STATUS ===" << endl;
-    cout << format("{:<19}: {}\n", "Registered", registeredCount);
-    cout << format("{:<19}: {}\n", "Approved", approvedCount);
-    cout << format("{:<19}: {}\n", "Rejected", rejectedCount);
+    cout << format("{:<19}: {}\n", "SCHEDULED", scheduledCount);
+    cout << format("{:<19}: {}\n", "UNSCHEDULED", unscheduledCount);
+    cout << format("{:<19}: {}\n", "CANCELLED", cancelledCount);
     cout << endl;
 
     cout << "=== MY BOOKING STATUS ===" << endl;
     cout << format("{:<19}: {}\n", "Pending", pendingCount);
     cout << format("{:<19}: {}\n", "Confirmed", confirmedCount);
     cout << format("{:<19}: {}\n", "Completed", completedCount);
-    cout << format("{:<19}: {}\n", "Cancelled", cancelledCount);
+    cout << format("{:<19}: {}\n", "Cancelled", bookingCancelledCount);
     cout << string(60, '=') << endl;
 
     if (totalRegistrations == 0 && totalBookings == 0) {
@@ -408,7 +408,8 @@ void searchEvents(const SystemData& data) {
         if (normalizedRegUser == normalizedCurrentUser) {
             if (toUpperCase(reg.eventTitle).find(upperSearchTerm) != string::npos ||
                 toUpperCase(reg.manufacturer).find(upperSearchTerm) != string::npos ||
-                toUpperCase(reg.organizer.organizerName).find(upperSearchTerm) != string::npos) {
+                toUpperCase(reg.organizer.organizerName).find(upperSearchTerm) != string::npos ||
+                toUpperCase(reg.eventStatus).find(upperSearchTerm) != string::npos) { 
                 foundRegistrations.push_back(reg);
             }
         }
@@ -526,7 +527,7 @@ void generateEventReport(const SystemData& data) {
             reportFile << format("Title: {}\n", reg.eventTitle);
             reportFile << format("Manufacturer: {}\n", reg.manufacturer);
             reportFile << format("Organizer: {}\n", reg.organizer.organizerName);
-            reportFile << format("Status: {}\n", reg.eventStatus);
+            reportFile << format("Status: {}\n", reg.eventStatus); 
             reportFile << format("Expected Guests: {}\n", reg.expectedGuests);
             reportFile << format("Budget: RM {:.2f}\n", reg.estimatedBudget);
             reportFile << format("Products: {}\n", reg.productQuantity);
