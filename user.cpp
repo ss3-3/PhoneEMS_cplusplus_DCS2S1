@@ -124,78 +124,81 @@ void signUp(SystemData& data) {
 
 void loginUser(SystemData& data, bool *validation) {
     clearScreen();
-    cout << "=== USER LOGIN ===" << endl;
-    cout << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
-
-    string userID = getValidStringInputWithExit("Enter User ID or Email: ");
-
-    if (userID.empty())
+    while (true)
     {
-        confirmExit();
-        return;
-    }
-    string password = getValidStringInputWithExit("Enter Password: ");
-    if (password.empty())
-    {
-        confirmExit();
-        return;
-    }
+        cout << "=== USER LOGIN ===" << endl;
+        cout << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
 
-    //// Normalize input for comparison
-    //string normalizedInputID = normalizeUserID(userID);
+        string userID = getValidStringInputWithExit("Enter User ID or Email: ");
 
-    // Find user with normalized comparison
-    for (auto& user : data.organizer) {
-        //string normalizedStoredID = normalizeUserID(user.userID);
-
-        if ((user.userID == userID || user.organizerEmail == userID) && (password == user.password)) {
-            user.isLoggedIn = true;
-
-            // CRITICAL: Store the ORIGINAL userID from file, not the input
-            data.currentUser = user.userID;  // Use the stored version
-
-            cout << "Login successful!" << endl;
-            cout << "Welcome, " << user.organizerName << "!" << endl;
-
-            // Debug output to verify IDs match
-            //cout << "\n=== DEBUG INFO ===" << endl;
-            //cout << "Input userID: '" << userID << "'" << endl;
-            //cout << "Stored userID: '" << user.userID << "'" << endl;
-            //cout << "Current user set to: '" << data.currentUser << "'" << endl;
-
-            //// Count user's data immediately
-            //int userRegistrations = 0;
-            //int userBookings = 0;
-
-            //for (const auto& reg : data.registrations) {
-            //    cout << "Checking registration " << reg.eventID
-            //        << " with userID: '" << reg.organizer.userID << "'" << endl;
-            //    if (normalizeUserID(reg.organizer.userID) == normalizedStoredID) {
-            //        userRegistrations++;
-            //    }
-            //}
-
-            //for (const auto& booking : data.bookings) {
-            //    cout << "Checking booking " << booking.bookingID
-            //        << " with userID: '" << booking.eventReg.organizer.userID << "'" << endl;
-            //    if (normalizeUserID(booking.eventReg.organizer.userID) == normalizedStoredID) {
-            //        userBookings++;
-            //    }
-            //}
-
-            //cout << "Found " << userRegistrations << " registrations and "
-            //    << userBookings << " bookings for this user." << endl;
-            //cout << "==================" << endl;
-
-            saveUsersToFile(data.organizer);
-            *validation = true;
+        if (userID.empty())
+        {
+            confirmExit();
             return;
         }
-    }
+        string password = getValidPassword("Enter Password: ");
+        if (password.empty())
+        {
+            confirmExit();
+            return;
+        }
+        cin.ignore();
 
-    cout << "Invalid User ID or Password! \nTips: Enter your User ID with capital letter. " << endl;
-    *validation = false;
-    return;
+        //// Normalize input for comparison
+        //string normalizedInputID = normalizeUserID(userID);
+
+        // Find user with normalized comparison
+        for (auto& user : data.organizer) {
+            //string normalizedStoredID = normalizeUserID(user.userID);
+
+            if ((user.userID == userID || user.organizerEmail == userID) && (password == user.password)) {
+                user.isLoggedIn = true;
+
+                // CRITICAL: Store the ORIGINAL userID from file, not the input
+                data.currentUser = user.userID;  // Use the stored version
+
+                cout << "Login successful!" << endl;
+                cout << "Welcome, " << user.organizerName << "!" << endl;
+
+                // Debug output to verify IDs match
+                //cout << "\n=== DEBUG INFO ===" << endl;
+                //cout << "Input userID: '" << userID << "'" << endl;
+                //cout << "Stored userID: '" << user.userID << "'" << endl;
+                //cout << "Current user set to: '" << data.currentUser << "'" << endl;
+
+                //// Count user's data immediately
+                //int userRegistrations = 0;
+                //int userBookings = 0;
+
+                //for (const auto& reg : data.registrations) {
+                //    cout << "Checking registration " << reg.eventID
+                //        << " with userID: '" << reg.organizer.userID << "'" << endl;
+                //    if (normalizeUserID(reg.organizer.userID) == normalizedStoredID) {
+                //        userRegistrations++;
+                //    }
+                //}
+
+                //for (const auto& booking : data.bookings) {
+                //    cout << "Checking booking " << booking.bookingID
+                //        << " with userID: '" << booking.eventReg.organizer.userID << "'" << endl;
+                //    if (normalizeUserID(booking.eventReg.organizer.userID) == normalizedStoredID) {
+                //        userBookings++;
+                //    }
+                //}
+
+                //cout << "Found " << userRegistrations << " registrations and "
+                //    << userBookings << " bookings for this user." << endl;
+                //cout << "==================" << endl;
+
+                saveUsersToFile(data.organizer);
+                *validation = true;
+                return;
+            }
+        }
+        clearScreen();
+        cout << "Invalid User ID or Password! \nTips: Enter your User ID with capital letter. " << endl;
+        *validation = false;
+    }
 }
 
 bool IsIdDuplicate(const string& userID) {
