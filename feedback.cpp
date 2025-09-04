@@ -66,7 +66,7 @@ void submitEventFeedback(SystemData& data) {
         string normalizedBookingUser = normalizeUserID(booking.eventReg.organizer.userID);
         if (normalizedBookingUser == normalizedCurrentUser &&
             (booking.bookingStatus == "Confirmed" || booking.bookingStatus == "Completed")) {
-            userCompletedBookings.push_back(&booking); 
+            userCompletedBookings.push_back(&booking);
         }
     }
 
@@ -118,12 +118,56 @@ void submitEventFeedback(SystemData& data) {
     cout << "\nSelected Event: " << newFeedback.eventTitle << endl;
     cout << setfill('-') << setw(50) << "-" << setfill(' ') << endl;
 
-    // Get ratings (1-5 scale)
+    // Rating system using 2D array
+    const int NUM_CATEGORIES = 4;
+    const int RATING_SCALE = 5;
+
+    // 2D array to store rating options and user selections
+    // Row 0: venue, Row 1: organization, Row 2: logistics, Row 3: overall
+    int ratingMatrix[NUM_CATEGORIES][RATING_SCALE + 1]; // +1 for 1-based indexing
+
+    // Initialize rating matrix to 0
+    for (int i = 0; i < NUM_CATEGORIES; i++) {
+        for (int j = 0; j <= RATING_SCALE; j++) {
+            ratingMatrix[i][j] = 0;
+        }
+    }
+
+    // Rating categories
+    string categories[NUM_CATEGORIES] = {
+        "Venue Rating",
+        "Event Organization Rating",
+        "Logistics Rating",
+        "Overall Rating"
+    };
+
+    // Collect ratings using the 2D array structure
     cout << "\nPlease rate the following aspects (1-5 scale, where 5 is excellent):" << endl;
-    newFeedback.venueRating = getValidIntegerInput("Venue Rating [1-5]: ", 1, 5);
-    newFeedback.organizationRating = getValidIntegerInput("Event Organization Rating [1-5]: ", 1, 5);
-    newFeedback.logisticsRating = getValidIntegerInput("Logistics Rating [1-5]: ", 1, 5);
-    newFeedback.overallRating = getValidIntegerInput("Overall Rating [1-5]: ", 1, 5);
+
+    for (int i = 0; i < NUM_CATEGORIES; i++) {
+        int rating = getValidIntegerInput(categories[i] + " [1-5]: ", 1, 5);
+        ratingMatrix[i][rating] = 1; // Mark the selected rating
+
+        // Store in the feedback structure
+        switch (i) {
+        case 0: newFeedback.venueRating = rating; break;
+        case 1: newFeedback.organizationRating = rating; break;
+        case 2: newFeedback.logisticsRating = rating; break;
+        case 3: newFeedback.overallRating = rating; break;
+        }
+    }
+
+    // Display rating summary using the matrix
+    cout << "\n--- Rating Summary ---" << endl;
+    for (int i = 0; i < NUM_CATEGORIES; i++) {
+        cout << categories[i] << ": ";
+        for (int j = 1; j <= RATING_SCALE; j++) {
+            if (ratingMatrix[i][j] == 1) {
+                cout << j << "/5" << endl;
+                break;
+            }
+        }
+    }
 
     // Get comments
     cout << "\nPlease provide your comments:" << endl;
@@ -264,45 +308,78 @@ void viewFeedbackStatistics(const SystemData& data) {
 
     size_t totalFeedback = userFeedbacks.size();
 
-    // Calculate user's statistics
-    double totalVenue = 0, totalOrg = 0, totalLog = 0, totalOverall = 0;
-    int recommendCount = 0;
+    // Calculate user's statistics using 2D array
+    const int NUM_CATEGORIES = 4;
+    const int RATING_SCALE = 5;
 
-    for (const auto& feedback : userFeedbacks) {
-        totalVenue += feedback.venueRating;
-        totalOrg += feedback.organizationRating;
-        totalLog += feedback.logisticsRating;
-        totalOverall += feedback.overallRating;
-        if (feedback.wouldRecommend) recommendCount++;
+    // 2D array for rating frequency analysis
+    // Rows: categories (venue, org, logistics, overall)
+    // Columns: rating values (1-5)
+    int ratingFrequency[NUM_CATEGORIES][RATING_SCALE + 1];
+
+    // Initialize frequency matrix
+    for (int i = 0; i < NUM_CATEGORIES; i++) {
+        for (int j = 0; j <= RATING_SCALE; j++) {
+            ratingFrequency[i][j] = 0;
+        }
     }
+
+    // Count frequencies from user's feedback
+    for (const auto& feedback : userFeedbacks) {
+        ratingFrequency[0][feedback.venueRating]++;
+        ratingFrequency[1][feedback.organizationRating]++;
+        ratingFrequency[2][feedback.logisticsRating]++;
+        ratingFrequency[3][feedback.overallRating]++;
+    }
+
+    // Category names
+    string categoryNames[NUM_CATEGORIES] = {
+        "Venue", "Organization", "Logistics", "Overall"
+    };
 
     cout << "User: " << data.currentUser << endl;
     cout << setfill('-') << setw(60) << "-" << setfill(' ') << endl;
-    cout << "MY FEEDBACK STATISTICS" << endl;
-    cout << setfill('-') << setw(40) << "-" << setfill(' ') << endl;
-    cout << "My Total Feedback Submissions: " << totalFeedback << endl;
-    cout << "My Average Venue Rating: " << fixed << setprecision(2) << (totalVenue / totalFeedback) << "/5" << endl;
-    cout << "My Average Organization Rating: " << (totalOrg / totalFeedback) << "/5" << endl;
-    cout << "My Average Logistics Rating: " << (totalLog / totalFeedback) << "/5" << endl;
-    cout << "My Average Overall Rating: " << (totalOverall / totalFeedback) << "/5" << endl;
-    cout << "My Recommendation Rate: " << recommendCount << "/" << totalFeedback <<
-        " (" << (recommendCount * 100.0 / totalFeedback) << "%)" << endl;
 
-    // User's rating distribution
-    cout << "\nMY RATING DISTRIBUTION" << endl;
-    cout << setfill('-') << setw(40) << "-" << setfill(' ') << endl;
+    // Display detailed rating breakdown using the 2D array
+    cout << "DETAILED RATING BREAKDOWN" << endl;
+    cout << setfill('-') << setw(50) << "-" << setfill(' ') << endl;
 
-    vector<int> overallCounts(6, 0); // Index 0 unused, 1-5 for ratings
-    for (const auto& feedback : userFeedbacks) {
-        overallCounts[feedback.overallRating]++;
+    for (int category = 0; category < NUM_CATEGORIES; category++) {
+        cout << categoryNames[category] << " Ratings:" << endl;
+
+        for (int rating = 5; rating >= 1; rating--) {
+            int count = ratingFrequency[category][rating];
+            double percentage = (count * 100.0) / totalFeedback;
+
+            cout << "  " << rating << " stars: " << count
+                << " (" << fixed << setprecision(1) << percentage << "%)" << endl;
+        }
+        cout << endl;
     }
 
-    for (int i = 5; i >= 1; i--) {
-        cout << i << " stars: " << overallCounts[i] << " (" <<
-            (overallCounts[i] * 100.0 / totalFeedback) << "%)" << endl;
+    // Calculate and display averages using the matrix
+    cout << "CATEGORY AVERAGES" << endl;
+    cout << setfill('-') << setw(30) << "-" << setfill(' ') << endl;
+
+    for (int category = 0; category < NUM_CATEGORIES; category++) {
+        double total = 0;
+        int count = 0;
+
+        for (int rating = 1; rating <= RATING_SCALE; rating++) {
+            total += rating * ratingFrequency[category][rating];
+            count += ratingFrequency[category][rating];
+        }
+
+        double average = (count > 0) ? total / count : 0;
+        cout << categoryNames[category] << " Average: "
+            << fixed << setprecision(2) << average << "/5" << endl;
     }
 
-    // User's venue performance
+    // Display the comparison matrices
+    displayRatingComparisonMatrix(userFeedbacks);
+    displayVenuePerformanceMatrix(userFeedbacks);
+
+    // User's venue performance (existing code)
     cout << "\nMY VENUE EXPERIENCES" << endl;
     cout << setfill('-') << setw(40) << "-" << setfill(' ') << endl;
 
@@ -333,7 +410,6 @@ void viewFeedbackStatistics(const SystemData& data) {
     cout << setfill('-') << setw(40) << "-" << setfill(' ') << endl;
 
     if (userFeedbacks.size() >= 3) {
-        // Show trend for user's last few feedback
         auto recent = userFeedbacks.end() - min(size_t(5), userFeedbacks.size());
         double recentAvg = 0;
         for (auto it = recent; it != userFeedbacks.end(); ++it) {
@@ -436,5 +512,136 @@ void deleteFeedback(SystemData& data) {
     }
     else {
         cout << "Delete operation cancelled." << endl;
+    }
+}
+
+void displayRatingComparisonMatrix(const vector<EventFeedback>& userFeedbacks) {
+    const int NUM_CATEGORIES = 4;
+    const int MAX_EVENTS = 10; // Display last 10 events
+
+    // 2D array for rating comparison
+    // Rows: recent events, Columns: rating categories
+    int recentRatings[MAX_EVENTS][NUM_CATEGORIES];
+    string eventTitles[MAX_EVENTS];
+
+    // Initialize arrays
+    for (int i = 0; i < MAX_EVENTS; i++) {
+        eventTitles[i] = "";
+        for (int j = 0; j < NUM_CATEGORIES; j++) {
+            recentRatings[i][j] = 0;
+        }
+    }
+
+    // Fill with recent feedback data
+    int eventCount = min(MAX_EVENTS, (int)userFeedbacks.size());
+    int startIndex = max(0, (int)userFeedbacks.size() - MAX_EVENTS);
+
+    for (int i = 0; i < eventCount; i++) {
+        const auto& feedback = userFeedbacks[startIndex + i];
+        eventTitles[i] = feedback.eventTitle.substr(0, 20); // Truncate for display
+        recentRatings[i][0] = feedback.venueRating;
+        recentRatings[i][1] = feedback.organizationRating;
+        recentRatings[i][2] = feedback.logisticsRating;
+        recentRatings[i][3] = feedback.overallRating;
+    }
+
+    // Display comparison matrix
+    cout << "\nRATING COMPARISON MATRIX (Recent Events)" << endl;
+    cout << setfill('-') << setw(70) << "-" << setfill(' ') << endl;
+    cout << left << setw(22) << "Event"
+        << setw(8) << "Venue"
+        << setw(8) << "Org"
+        << setw(8) << "Log"
+        << setw(8) << "Overall" << endl;
+    cout << setfill('-') << setw(70) << "-" << setfill(' ') << endl;
+
+    for (int i = 0; i < eventCount; i++) {
+        cout << left << setw(22) << eventTitles[i];
+        for (int j = 0; j < NUM_CATEGORIES; j++) {
+            cout << setw(8) << recentRatings[i][j];
+        }
+        cout << endl;
+    }
+
+    // Calculate column averages
+    cout << setfill('-') << setw(70) << "-" << setfill(' ') << endl;
+    cout << left << setw(22) << "Average:";
+
+    for (int category = 0; category < NUM_CATEGORIES; category++) {
+        double total = 0;
+        for (int event = 0; event < eventCount; event++) {
+            total += recentRatings[event][category];
+        }
+        double average = (eventCount > 0) ? total / eventCount : 0;
+        cout << setw(8) << fixed << setprecision(1) << average;
+    }
+    cout << endl;
+}
+
+void displayVenuePerformanceMatrix(const vector<EventFeedback>& userFeedbacks) {
+    const int MAX_VENUES = 5;
+    const int NUM_METRICS = 3; // venue rating, overall rating, recommendation count
+
+    // 2D array for venue performance data
+    double venueMatrix[MAX_VENUES][NUM_METRICS];
+    string venueNames[MAX_VENUES];
+    int venueCounts[MAX_VENUES];
+
+    // Initialize arrays
+    for (int i = 0; i < MAX_VENUES; i++) {
+        venueNames[i] = "";
+        venueCounts[i] = 0;
+        for (int j = 0; j < NUM_METRICS; j++) {
+            venueMatrix[i][j] = 0.0;
+        }
+    }
+
+    // Collect unique venues and their data
+    vector<string> uniqueVenues;
+    for (const auto& feedback : userFeedbacks) {
+        if (find(uniqueVenues.begin(), uniqueVenues.end(), feedback.venueName) == uniqueVenues.end()) {
+            uniqueVenues.push_back(feedback.venueName);
+        }
+    }
+
+    int venueCount = min(MAX_VENUES, (int)uniqueVenues.size());
+
+    // Calculate metrics for each venue
+    for (int i = 0; i < venueCount; i++) {
+        venueNames[i] = uniqueVenues[i];
+        double totalVenueRating = 0, totalOverallRating = 0;
+        int recommendCount = 0, feedbackCount = 0;
+
+        for (const auto& feedback : userFeedbacks) {
+            if (feedback.venueName == uniqueVenues[i]) {
+                totalVenueRating += feedback.venueRating;
+                totalOverallRating += feedback.overallRating;
+                if (feedback.wouldRecommend) recommendCount++;
+                feedbackCount++;
+            }
+        }
+
+        venueCounts[i] = feedbackCount;
+        venueMatrix[i][0] = (feedbackCount > 0) ? totalVenueRating / feedbackCount : 0;
+        venueMatrix[i][1] = (feedbackCount > 0) ? totalOverallRating / feedbackCount : 0;
+        venueMatrix[i][2] = (feedbackCount > 0) ? (recommendCount * 100.0 / feedbackCount) : 0;
+    }
+
+    // Display venue performance matrix
+    cout << "\nVENUE PERFORMANCE MATRIX" << endl;
+    cout << setfill('-') << setw(65) << "-" << setfill(' ') << endl;
+    cout << left << setw(20) << "Venue"
+        << setw(12) << "Venue Avg"
+        << setw(12) << "Overall Avg"
+        << setw(12) << "Recommend %"
+        << setw(9) << "Count" << endl;
+    cout << setfill('-') << setw(65) << "-" << setfill(' ') << endl;
+
+    for (int i = 0; i < venueCount; i++) {
+        cout << left << setw(20) << venueNames[i].substr(0, 19)
+            << setw(12) << fixed << setprecision(1) << venueMatrix[i][0]
+            << setw(12) << venueMatrix[i][1]
+            << setw(12) << venueMatrix[i][2] << "%"
+            << setw(9) << venueCounts[i] << endl;
     }
 }

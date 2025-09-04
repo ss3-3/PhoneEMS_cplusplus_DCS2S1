@@ -10,7 +10,7 @@
 #include <regex>
 #include <map> 
 #include <utility>
-#include <format>  // C++20 format library
+#include <format> 
 #include "date.h"
 #include "venue.h"
 #include "event_registration.h"
