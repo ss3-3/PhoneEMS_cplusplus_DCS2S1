@@ -1,3 +1,4 @@
 EVT1002|APPLE|iPhone 17 Series|1|iPhone 17,IP17,3999|iPhone 17 Series and iOS 26|500|5500|CANCELLED|USER1002|ANSON|012-345-6789|anson-apple@apple.com|CEO
 EVT1002|Apple|iPhone 17|1|iPhone 17 Pro Max,Pro Max,2000|haha|100|3000|SCHEDULED|USER1001|NG KAI ZHE|0123456789|kaizhe8229@gmail.com|CEO
 EVT1003|heg|iphone|1|iphone,16 pro max,100000|good|100|10000|UNSCHEDULED|USER1003|heng|012-345-6789|heng@gmail.com|ceo
+EVT1004|huawei|huawei pura 8|1|huawei pura 80,hwi-p80,2799|huawei pura 80 series|200|5000|UNSCHEDULED|USER1001|NG KAI ZHE|0123456789|kaizhe8229@gmail.com|CEO

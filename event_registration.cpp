@@ -462,7 +462,7 @@ void updateEventRegistration(SystemData& data) {
 
     viewEventRegistrations(data);
 
-    string eventID = getValidStringInput("\nEnter Event ID to update: ");
+    string eventID = getValidStringInputWithExit("\nEnter Event ID to update: ");
     if (eventID.empty()) return;
 
     eventID = toUpperCase(eventID);

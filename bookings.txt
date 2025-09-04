@@ -1,1 +1,2 @@
 BKG2001|EVT1002|iPhone 17|Apple|haha|100|3000|UNSCHEDULED|USER1001|NG KAI ZHE|0123456789|kaizhe8229@gmail.com|CEO|2026-01-01|09:00-13:00|V002|Hall B|Level 2, Convention Center|500|4000|Siti Nurhaliza|03-2345-6789|Confirmed|4000
+BKG2002|EVT1004|huawei pura 8|huawei|huawei pura 80 series|200|5000|UNSCHEDULED|USER1001|NG KAI ZHE|0123456789|kaizhe8229@gmail.com|CEO|2025-09-20|17:00-21:00|V001|Hall A|Level 1, Convention Center|300|2500|Ahmad Rahman|03-1234-5678|Confirmed|2500

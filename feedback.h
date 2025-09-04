@@ -56,4 +56,10 @@ void viewFeedbackStatistics(const SystemData& data);
 // Delete feedback (admin function)
 void deleteFeedback(SystemData& data);
 
+// Display rating comparison matrix
+void displayRatingComparisonMatrix(const vector<EventFeedback>& userFeedbacks);
+
+// Display venue performance matrix  
+void displayVenuePerformanceMatrix(const vector<EventFeedback>& userFeedbacks);
+
 #endif
