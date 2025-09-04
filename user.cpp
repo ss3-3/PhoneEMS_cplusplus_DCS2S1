@@ -25,6 +25,7 @@
 using namespace std;
 
 void signUp(SystemData& data) {
+    clearScreen();
     string password = "", password2 = "";
     bool validation = false;
 
@@ -94,7 +95,7 @@ void signUp(SystemData& data) {
             return;
         }
 
-        password2 = getValidPassword("-> Re-type new Password: ");
+        password2 = getValidPassword("-> Confirm new Password: ");
         if (password2 == "")
         {
             confirmExit();
