@@ -47,6 +47,7 @@ Date getValidDateInput();
 // Specialized validation
 string getValidPhoneNumber(const string& prompt);
 string getValidEmailAddress(const string& prompt);
+string getValidPassword(const string& prompt);
 string getValidEventStatus(const string& prompt);
 
 // Validate feedback rating input

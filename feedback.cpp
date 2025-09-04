@@ -66,7 +66,7 @@ void submitEventFeedback(SystemData& data) {
         string normalizedBookingUser = normalizeUserID(booking.eventReg.organizer.userID);
         if (normalizedBookingUser == normalizedCurrentUser &&
             (booking.bookingStatus == "Confirmed" || booking.bookingStatus == "Completed")) {
-            userCompletedBookings.push_back(&booking);
+            userCompletedBookings.push_back(&booking); 
         }
     }
 

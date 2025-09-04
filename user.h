@@ -8,11 +8,13 @@ using namespace std;
 
 struct Organizer {
     string userID;
-    string password;
+    char password[20];
     string organizerName; // Steven Lee
+    int age;
     string organizerContact; // 0123456789
     string organizerEmail; // stevenlee123@gmail.com
     string position;
+    string manufacturer;
     bool isLoggedIn = false;  // Initialize default value
 };
 
@@ -21,7 +23,7 @@ class SystemData;
 
 // Function prototypes - User Menu
 void signUp(SystemData& data);
-bool loginUser(SystemData& data);
+void loginUser(SystemData& data, bool *validation);
 void displayUserInfo(const Organizer& organizer);
 bool IsIdDuplicate(const string& userID);
 

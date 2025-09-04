@@ -26,7 +26,6 @@ string formatToTwoDecimals(double value) {
 }
 
 // File operations implementation
-
 void saveUsersToFile(const vector<Organizer>& users) {
     ofstream file("userInfo.txt");
     if (!file.is_open()) {
@@ -36,11 +35,13 @@ void saveUsersToFile(const vector<Organizer>& users) {
 
     for (const auto& user : users) {
         file << user.userID << "|"
-            << user.password << "|"
             << user.organizerName << "|"
+            << user.age << "|"
+            << user.manufacturer << "|"
+            << user.position << "|"
             << user.organizerContact << "|"
             << user.organizerEmail << "|"
-            << user.position << "|"
+            << user.password << "|"
             << (user.isLoggedIn ? "1" : "0") << endl;
     }
 
@@ -108,11 +109,16 @@ void loadUserFromFile(vector<Organizer>& users) {
         Organizer user;
 
         getline(ss, user.userID, '|');
-        getline(ss, user.password, '|');
         getline(ss, user.organizerName, '|');
+        getline(ss, field, '|');
+        user.age = stoi(field); //change string to int
+        getline(ss, user.manufacturer, '|');
+        getline(ss, user.position, '|');
         getline(ss, user.organizerContact, '|');
         getline(ss, user.organizerEmail, '|');
-        getline(ss, user.position, '|');
+        getline(ss, field, '|');
+        strncpy_s(user.password, field.c_str(), sizeof(user.password) - 1);
+        user.password[sizeof(user.password) - 1] = '\0'; //make sure end char
 
         // Parse isLoggedIn boolean
         getline(ss, field, '|');

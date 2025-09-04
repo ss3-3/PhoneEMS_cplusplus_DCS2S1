@@ -28,6 +28,7 @@ string getCurrentUserName(const SystemData& data);
 void displayLogo();
 void clearScreen();
 Date getCurrentDate();
+string generateUserID(const vector<Organizer>& user);
 string generateEventID(const vector<EventRegistration>& registrations);
 string generateBookingID(const vector<EventBooking>& bookings);
 string generateVenueID(const vector<Venue>& venues);
