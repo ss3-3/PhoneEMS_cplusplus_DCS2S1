@@ -27,7 +27,7 @@ struct EventBooking {
 // PENDING -> User created booking, waiting for payment
 // CONFIRMED -> Payment completed, booking is confirmed
 // COMPLETED -> Event has finished
-// CANCELLED -> Booking was cancelled
+// CANCELLED -> Booking was cancelled cause of registration cancellation
 
 // Function prototypes - Event Booking System
 class SystemData;

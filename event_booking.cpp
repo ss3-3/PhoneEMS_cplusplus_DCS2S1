@@ -673,9 +673,11 @@ void cancelEventBooking(SystemData& data) {
                     break;
                 }
             }
-
-            // Delete the booking completely
-            data.bookings.erase(data.bookings.begin() + bookingIndex);
+            for(auto& booking : data.bookings) {
+                if (booking.eventReg.eventID == data.bookings[bookingIndex].eventReg.eventID && normalizedCurrentUser == data.bookings[bookingIndex].eventReg.organizer.userID) {
+                    booking.bookingStatus = "Cancelled"; //change the booking status
+                }
+			}
 			saveRegistrationsToFile(data.registrations);
             saveBookingsToFile(data.bookings);
             cout << "Event booking cancelled successfully!" << endl;

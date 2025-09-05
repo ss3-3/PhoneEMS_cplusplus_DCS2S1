@@ -65,7 +65,7 @@ void submitEventFeedback(SystemData& data) {
     for (auto& booking : data.bookings) {
         string normalizedBookingUser = normalizeUserID(booking.eventReg.organizer.userID);
         if (normalizedBookingUser == normalizedCurrentUser &&
-            (booking.bookingStatus == "Confirmed" || booking.bookingStatus == "Completed")) {
+            (booking.bookingStatus == "Confirmed")) {
             userCompletedBookings.push_back(&booking);
         }
     }
@@ -202,6 +202,9 @@ void submitEventFeedback(SystemData& data) {
     data.feedbacks.push_back(newFeedback);
     saveFeedbackToFile(data.feedbacks);
 
+	//update status of booking to "Completed"
+	selectedBooking->bookingStatus = "Completed";
+	saveBookingsToFile(data.bookings); // In case booking status needs update
     cout << "\nFeedback submitted successfully!" << endl;
     cout << "Feedback ID: " << newFeedback.feedbackID << endl;
 }
@@ -508,6 +511,13 @@ void deleteFeedback(SystemData& data) {
     if (confirm == 'Y') {
         data.feedbacks.erase(data.feedbacks.begin() + actualIndex);
         saveFeedbackToFile(data.feedbacks);
+		//change status of booking back to "Confirmed"
+        for (auto& booking : data.bookings) {
+            if (booking.bookingID == toDelete.bookingID) {
+                booking.bookingStatus = "Confirmed";
+                break;
+            }
+		}
         cout << "Your feedback deleted successfully." << endl;
     }
     else {
