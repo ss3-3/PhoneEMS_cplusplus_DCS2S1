@@ -68,20 +68,20 @@ void makePayment(SystemData& data) {
         return;
     }
 
-    // Filter user's confirmed bookings that haven't been paid
+    // Filter user's bookings that haven't been paid
     vector<EventBooking> unpaidBookings;
     string normalizedCurrentUser = normalizeUserID(data.currentUser);
 
     for (const auto& booking : data.bookings) {
         string normalizedBookingUser = normalizeUserID(booking.eventReg.organizer.userID);
         if (normalizedBookingUser == normalizedCurrentUser &&
-            (booking.bookingStatus == "Confirmed" || booking.bookingStatus == "Pending")) {
+            (booking.bookingStatus == "Pending")) {
 
             // Check if payment already exists for this booking
             bool alreadyPaid = false;
             for (const auto& payment : data.payments) {
                 if (payment.bookingID == booking.bookingID &&
-                    payment.paymentStatus == "Completed") {
+                    payment.paymentStatus == "Confirmed") {
                     alreadyPaid = true;
                     break;
                 }
