@@ -596,7 +596,7 @@ void cancelEventBooking(SystemData& data) {
     string normalizedCurrentUser = normalizeUserID(data.currentUser);
     for (const auto& booking : data.bookings) {
         string normalizedBookingUser = normalizeUserID(booking.eventReg.organizer.userID);
-        if (booking.bookingStatus != "Cancelled" && normalizedBookingUser == normalizedCurrentUser) {
+        if (normalizedBookingUser == normalizedCurrentUser) {
             hasBookings = true;
             break;
         }
