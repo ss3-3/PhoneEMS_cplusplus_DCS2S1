@@ -239,6 +239,7 @@ void createEventBooking(SystemData& data) {
     cout << "TOTAL COST: RM " << fixed << setprecision(2) << newBooking.finalCost << endl;
     cout << "Status: " << newBooking.bookingStatus << endl;
 
+	saveRegistrationsToFile(data.registrations);
     saveBookingsToFile(data.bookings);
 }
 
@@ -595,7 +596,7 @@ void cancelEventBooking(SystemData& data) {
     string normalizedCurrentUser = normalizeUserID(data.currentUser);
     for (const auto& booking : data.bookings) {
         string normalizedBookingUser = normalizeUserID(booking.eventReg.organizer.userID);
-        if (normalizedBookingUser == normalizedCurrentUser) {
+        if (booking.bookingStatus != "Cancelled" && normalizedBookingUser == normalizedCurrentUser) {
             hasBookings = true;
             break;
         }
@@ -675,6 +676,7 @@ void cancelEventBooking(SystemData& data) {
 
             // Delete the booking completely
             data.bookings.erase(data.bookings.begin() + bookingIndex);
+			saveRegistrationsToFile(data.registrations);
             saveBookingsToFile(data.bookings);
             cout << "Event booking cancelled successfully!" << endl;
         }

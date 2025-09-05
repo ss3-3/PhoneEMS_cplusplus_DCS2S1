@@ -104,6 +104,7 @@ void mainSystemMenu(SystemData& data) {
             break;
         case 4:
             eventPaymentMenu(data);
+            break;
         case 5:
             feedbackMenu(data);
             break;
