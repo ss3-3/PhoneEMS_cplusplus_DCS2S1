@@ -36,10 +36,6 @@ void signUp(SystemData& data) {
     currentUser.userID = generateUserID(data.organizer);
     cout << "Your User ID: " << currentUser.userID << endl;
 
-    // Name
-    if (IsIdDuplicate(currentUser.userID)) { //check from the file
-        cout << "This name has already been taken" << endl;
-    }
     currentUser.organizerName = getValidStringInputWithExit("Enter your Name: ");
     if (currentUser.organizerName.empty())
     {
@@ -77,11 +73,23 @@ void signUp(SystemData& data) {
         confirmExit();
         return;
     }
-    currentUser.organizerEmail = getValidEmailAddress("Enter Organizer Email Address  (must small capital letter with @XXX.com): ");
-    if (currentUser.organizerEmail.empty())
+    while (true)
     {
-        confirmExit();
-        return;
+        currentUser.organizerEmail = getValidEmailAddress("Enter Organizer Email Address  (must small capital letter with @XXX.com): ");
+        if (currentUser.organizerEmail.empty())
+        {
+            confirmExit();
+            return;
+        }
+        // check duplicate email
+        if (IsIdDuplicateEmail(currentUser.organizerEmail)) { //check from the file
+            cout << "This email has already been taken! Please try to login! " << endl;
+        }
+        else
+        {
+            break;
+        }
+        
     }
 
     // Password
@@ -202,12 +210,12 @@ void loginUser(SystemData& data, bool *validation) {
     }
 }
 
-bool IsIdDuplicate(const string& userID) {
+bool IsIdDuplicateEmail(const string& email) {
     vector<Organizer> users;
     loadUserFromFile(users);
 
     for (const auto& user : users) {
-        if (user.userID == userID) {
+        if (user.organizerEmail == email) {
             return true;
         }
     }
