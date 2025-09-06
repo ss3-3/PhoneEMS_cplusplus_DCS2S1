@@ -260,6 +260,7 @@ string getValidStringInputWithExit(const string& prompt, int minLength) { //defa
     while (true) {
 
         cout << prompt << "(Enter '0' to return previous menu)" << endl;
+        cout << " -> ";
         getline(cin, input);
 
         //Check whether user enter '0' or not

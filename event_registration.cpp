@@ -381,7 +381,7 @@ void editPhoneInfo(EventRegistration* regPtr) {
                             }
                             hasDecimal = true;
                         }
-                        else if (newPrice[i] < '0' || newPrice[i] > '9') {
+                        else if (!isdigit(newPrice[i])) {
                             isValidFormat = false;
                             break;
                         }
@@ -394,6 +394,8 @@ void editPhoneInfo(EventRegistration* regPtr) {
                         newPriceDouble = stod(newPrice);
                         if (newPriceDouble > 0) {
                             phone.productPrice = newPriceDouble;
+                            cout << fixed << setprecision(2);  // display 2 decimal format
+                            cout << "New price set to RM " << phone.productPrice << endl;
                         }
                         else {
                             cout << "Price must be greater than 0. Keeping current price." << endl;
