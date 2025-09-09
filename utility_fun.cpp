@@ -107,12 +107,50 @@ string generateUserID(const vector<Organizer>& user) {
 }
 
 string generateEventID(const vector<EventRegistration>& registrations) {
-    int nextNumber = registrations.size() + 1001;
+    int maxNumber = 1000; // Starting base number (so first ID will be EVT1001)
+
+    // Parse all existing event IDs to find the maximum number
+    for (const auto& reg : registrations) {
+
+        // Extract the number part using stringstream
+        string numberPart = reg.eventID.substr(3); // Remove "EVT" prefix
+        stringstream ss(numberPart);
+        int currentNumber;
+
+        // Try to convert the number part to integer
+        if (ss >> currentNumber) {
+            // Successfully parsed the entire string as a number
+            if (currentNumber > maxNumber) {
+                maxNumber = currentNumber;
+            }
+        }
+    }
+
+    // Generate new ID with next available number
+    int nextNumber = maxNumber + 1;
     return "EVT" + to_string(nextNumber);
 }
 
 string generateBookingID(const vector<EventBooking>& bookings) {
-    int nextNumber = bookings.size() + 2001;
+    int maxNumber = 2000;
+
+    for (const auto& booking : bookings) {
+        // Extract the number part using stringstream
+        string numberPart = booking.bookingID.substr(3); // Remove "BKG" prefix
+        stringstream ss(numberPart);
+        int currentNumber;
+
+        // Try to convert the number part to integer
+        if (ss >> currentNumber) {
+            // Successfully parsed the entire string as a number
+            if (currentNumber > maxNumber) {
+                maxNumber = currentNumber;
+            }
+        }
+    }
+
+    // Generate new ID with next available number
+    int nextNumber = maxNumber + 1;
     return "BKG" + to_string(nextNumber);
 }
 

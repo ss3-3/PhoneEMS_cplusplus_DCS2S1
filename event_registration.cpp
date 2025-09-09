@@ -695,7 +695,7 @@ void deleteEventRegistration(SystemData& data) {
     }
 
     viewEventRegistrations(data);
-    string eventID = getValidStringInput("\nEnter Event ID to cancel/delete: ");
+    string eventID = getValidStringInputWithExit("\nEnter Event ID to cancel/delete ");
     if (eventID.empty()) return;
     eventID = toUpperCase(eventID);
 
@@ -781,6 +781,7 @@ void deleteEventRegistration(SystemData& data) {
         int cancelledBookings = 0;
         for (int bookingIndex : affectedBookings) {
             data.bookings[bookingIndex].bookingStatus = "Cancelled";
+            removeBookingFromVenueSchedule(data.venues, data.bookings[bookingIndex].bookingID);
             cancelledBookings++;
         }
 
@@ -796,6 +797,7 @@ void deleteEventRegistration(SystemData& data) {
 
         // After successful cancellation, ask if user wants to delete (RECURSION method)
         cout << "\nThe event is now CANCELLED. Would you like to permanently delete it?" << endl;
+        cout << "YES(Y): REDIRECT THE EVENT INFO PAGE TO DELETE THE PRORGAM\nNO(N): CANCEL THE PERMANENT DELETE OPERATION" << endl;
         char deleteConfirm = getValidCharInput("Delete this cancelled event? (Y/N): ", validChars);
 
         if (deleteConfirm == 'Y') {
