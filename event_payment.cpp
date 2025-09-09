@@ -58,6 +58,8 @@ void eventPaymentMenu(SystemData& data) {
 }
 
 void makePayment(SystemData& data) {
+    const double PROMO_DISCOUNT = 0.10;
+
     clearScreen();
     cout << "=== MAKE PAYMENT ===" << endl;
     cout << format("{:=<50}", "") << endl;
@@ -120,6 +122,22 @@ void makePayment(SystemData& data) {
 
     int bookingChoice = getValidIntegerInput("Select booking to pay for: ", 1, static_cast<int>(unpaidBookings.size()));
     EventBooking selectedBooking = unpaidBookings[bookingChoice - 1];
+
+    // Promo code (optional)
+    cout << "\nDo you have a promo code? (Enter or leave blank): ";
+    string promoCode;
+    getline(cin, promoCode);
+
+    // Apply discount if valid
+    if (!promoCode.empty()) {
+        if (promoCode == "PROMO10") { // Example valid promo
+            cout << "Promo code applied! You get 10% discount." << endl;
+            selectedBooking.finalCost *= (1.0 - PROMO_DISCOUNT);
+        }
+        else {
+            cout << "Invalid promo code. No discount applied." << endl;
+        }
+    }
 
     // Create payment record
     Payment newPayment;
@@ -187,13 +205,59 @@ void makePayment(SystemData& data) {
 
         newPayment.cardHolderName = getValidStringInput("Enter cardholder name: ", 2);
 
-        cout << "Enter expiry date (MM/YY): ";
+        regex pattern(R"(^(0[1-9]|1[0-2])\/([0-9]{2})$)");
         string expiryDate;
-        getline(cin, expiryDate);
+        while (true) {
+            cout << "Enter expiry date (MM/YY): ";
+            getline(cin, expiryDate);
 
-        cout << "Enter CVV (3 digits): ";
+            if (!regex_match(expiryDate, pattern)) {
+                cout << "Invalid format. Please use MM/YY (e.g., 05/27)." << endl;
+                continue;
+            }
+
+            // Check if expiry is not in the past (optional)
+            int month = stoi(expiryDate.substr(0, 2));
+            int year = stoi(expiryDate.substr(3, 2));
+
+            // demo to get current month/year
+            int currentYear = getCurrentDate().year;
+            int currentMonth = getCurrentDate().month;
+
+            if (year < currentYear || (year == currentYear && month < currentMonth)) {
+                cout << "Card expired. Please enter a valid expiry date." << endl;
+                continue;
+            }
+
+            break;
+        }
+
         string cvv;
-        getline(cin, cvv);
+        while (true) {
+            cout << "Enter CVV (3 digits): ";
+            getline(cin, cvv);
+
+            // Remove spaces
+            string cleanCvv = "";
+            for (char c : cvv) {
+                if (c != ' ') cleanCvv += c;
+            }
+
+            if (cleanCvv.length() == 3) {
+                bool allDigits = true;
+                for (char c : cleanCvv) {
+                    if (c < '0' || c > '9') {
+                        allDigits = false;
+                        break;
+                    }
+                }
+                if (allDigits) {
+                    cvv = cleanCvv;
+                    break;
+                }
+            }
+            cout << "Invalid card number. Please enter 3 digits." << endl;
+        }
 
         cout << "\nProcessing card payment..." << endl;
     }
@@ -367,7 +431,7 @@ void processRefund(SystemData& data) {
 
         cout << "\n=== REFUND PROCESSED ===" << endl;
         cout << format("Refund amount: RM {:.2f}", selectedPayment.amount) << endl;
-        cout << "Processing time: 5-10 business days" << endl;
+        cout << "Processing time: 5-7 business days" << endl;
         cout << "Refund method: Original payment method" << endl;
 
         if (!selectedPayment.cardNumber.empty()) {

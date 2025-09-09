@@ -1,2 +1,3 @@
 FB1000|BKG2001|iPhone 17|NG KAI ZHE|2026-01-01|Hall B|USER1001|2025-09-20|5|5|5|5|1|aha|nice|good|overall ok|nothing
 FB1001|BKG2002|huawei pura 8|NG KAI ZHE|2025-09-20|Hall A|USER1001|2025-09-20|4|5|4|5|0|haha|haha|hah|haha|huh
+FB1002|BKG2002|huawei|heng|2025-09-20|Auditorium|USER1003|2025-09-20|5|5|5|5|1|ice|nice|nice|nice|nice
