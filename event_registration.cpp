@@ -30,7 +30,7 @@ void eventRegistrationMenu(SystemData& data) {
         cout << "1. Create New Event Registration" << endl;
         cout << "2. View My Event Registrations" << endl;
         cout << "3. Update Event Registration" << endl;
-        cout << "4. Delete Event Registration" << endl;
+        cout << "4. Cancel / Delete Event Registration" << endl;
         cout << "5. Back to Main Menu" << endl;
         cout << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
 
@@ -670,7 +670,7 @@ void updateEventRegistration(SystemData& data) {
 
 void deleteEventRegistration(SystemData& data) {
     clearScreen();
-    cout << "=== CANCEL EVENT REGISTRATION ===" << endl;
+    cout << "=== CANCEL/DELETE EVENT REGISTRATION ===" << endl;
 
     // Check if user is logged in
     if (data.currentUser.empty()) {
@@ -690,12 +690,12 @@ void deleteEventRegistration(SystemData& data) {
     }
 
     if (!hasRegistrations) {
-        cout << "You have no event registrations to cancel." << endl;
+        cout << "You have no event registrations to cancel/delete." << endl;
         return;
     }
 
     viewEventRegistrations(data);
-    string eventID = getValidStringInput("\nEnter Event ID to cancel: ");
+    string eventID = getValidStringInput("\nEnter Event ID to cancel/delete: ");
     if (eventID.empty()) return;
     eventID = toUpperCase(eventID);
 
@@ -711,13 +711,7 @@ void deleteEventRegistration(SystemData& data) {
     }
 
     if (regIndex == -1) {
-        cout << "Event registration not found or you don't have permission to cancel it!" << endl;
-        return;
-    }
-
-    // Check if event is already cancelled
-    if (data.registrations[regIndex].eventStatus == "CANCELLED") {
-        cout << "This event is already cancelled!" << endl;
+        cout << "Event registration not found or you don't have permission to cancel/delete it!" << endl;
         return;
     }
 
@@ -728,11 +722,42 @@ void deleteEventRegistration(SystemData& data) {
     cout << "Organizer: " << data.registrations[regIndex].organizer.organizerName << endl;
     cout << "Current Status: " << data.registrations[regIndex].eventStatus << endl;
 
+    if (data.registrations[regIndex].eventStatus == "CANCELLED") {
+        cout << "This event is already CANCELLED. " << endl;
+        vector<char> validChars = { 'Y', 'N' };
+        char confirmDel = getValidCharInput("Do you want to permanently delete this event? (Y/N): ", validChars);
+
+        if (confirmDel == 'Y') {
+            string eventIDToDelete = data.registrations[regIndex].eventID;
+
+            // delete event
+            data.registrations.erase(data.registrations.begin() + regIndex);
+
+            // delete related bookings
+            for (size_t i = 0; i < data.bookings.size(); ) {
+                if (data.bookings[i].eventReg.eventID == eventIDToDelete) {
+                    data.bookings.erase(data.bookings.begin() + i);
+                }
+                else {
+                    i++;
+                }
+            }
+
+            saveRegistrationsToFile(data.registrations);
+            saveBookingsToFile(data.bookings);
+
+            cout << "Event and all related bookings deleted permanently!" << endl;
+        }
+        else {
+            cout << "Delete aborted." << endl;
+        }
+        return;
+    }
     // Check if registration has active bookings
     vector<int> affectedBookings;
     for (size_t i = 0; i < data.bookings.size(); i++) {
         if (data.bookings[i].eventReg.eventID == eventID &&
-            data.bookings[i].bookingStatus != "CANCELLED") {
+            data.bookings[i].bookingStatus != "Cancelled") {
             affectedBookings.push_back(i);
         }
     }
@@ -747,14 +772,15 @@ void deleteEventRegistration(SystemData& data) {
     vector<char> validChars = { 'Y', 'N' };
     char confirm = getValidCharInput("\nDo you really want to cancel this event? (Y/N): ", validChars);
 
-    if (confirm == 'Y' || confirm == 'y') {
+    // Cancel event process
+    if (confirm == 'Y') {
         // Cancel the event registration
         data.registrations[regIndex].eventStatus = "CANCELLED";
 
         // Cancel all active bookings for this event
         int cancelledBookings = 0;
         for (int bookingIndex : affectedBookings) {
-            data.bookings[bookingIndex].bookingStatus = "CANCELLED";
+            data.bookings[bookingIndex].bookingStatus = "Cancelled";
             cancelledBookings++;
         }
 
@@ -766,6 +792,19 @@ void deleteEventRegistration(SystemData& data) {
         if (cancelledBookings > 0) {
             cout << cancelledBookings << " booking(s) have been automatically cancelled." << endl;
             cout << "Affected users will be notified when they view their bookings." << endl;
+        }
+
+        // After successful cancellation, ask if user wants to delete (RECURSION method)
+        cout << "\nThe event is now CANCELLED. Would you like to permanently delete it?" << endl;
+        char deleteConfirm = getValidCharInput("Delete this cancelled event? (Y/N): ", validChars);
+
+        if (deleteConfirm == 'Y') {
+            cout << "\nProceeding to delete the cancelled event..." << endl;
+            // Recursive call to handle the deletion of the now-cancelled event
+            deleteEventRegistration(data);
+        }
+        else {
+            cout << "Event remains cancelled but not deleted." << endl;
         }
     }
     else {

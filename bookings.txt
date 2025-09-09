@@ -1,2 +1,1 @@
-BKG2001|EVT1001|asdf|qwer|lkjhg|300|5000|UNSCHEDULED|USER1001|NG KAI ZHE|0123456789|kaizhe8229@gmail.com|CEO|2026-01-10|09:00-13:00|V001|Hall A|Level 1, Convention Center|300|2500|Ahmad Rahman|03-1234-5678|Cancelled|2500
 BKG2002|EVT1002|huawei|huawei ti|huawei launch|1200|1e+12|UNSCHEDULED|USER1003|heng|012-345-6789|heng@gmail.com|ceo|2025-09-20|09:00-13:00|V004|Auditorium|Main Building, Tech Plaza|1200|10000|Maria Santos|03-4567-8901|Cancelled|10150
