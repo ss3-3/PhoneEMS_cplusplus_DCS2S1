@@ -36,10 +36,6 @@ void signUp(SystemData& data) {
     currentUser.userID = generateUserID(data.organizer);
     cout << "Your User ID: " << currentUser.userID << endl;
 
-    // Name
-    if (IsIdDuplicate(currentUser.userID)) { //check from the file
-        cout << "This name has already been taken" << endl;
-    }
     currentUser.organizerName = getValidStringInputWithExit("Enter your Name: ");
     if (currentUser.organizerName.empty())
     {
@@ -71,17 +67,40 @@ void signUp(SystemData& data) {
         confirmExit();
         return;
     }
-    currentUser.organizerContact = getValidPhoneNumber("Enter Organizer Contact: ");
-    if (currentUser.organizerContact.empty())
-    {
-        confirmExit();
-        return;
+    while (true) {
+        currentUser.organizerContact = getValidPhoneNumber("Enter Organizer Contact: ");
+        if (currentUser.organizerContact.empty())
+        {
+            confirmExit();
+            return;
+        }
+        //check duplicated phone number
+        if (IsIdDuplicatePhoneNumber(currentUser.organizerContact))
+        {
+            cout << "This phone number has already registered! Please enter 0 to stop and try to login! " << endl;
+        }
+        else
+        {
+            break; // exit while loop
+        }
     }
-    currentUser.organizerEmail = getValidEmailAddress("Enter Organizer Email Address  (must small capital letter with @XXX.com): ");
-    if (currentUser.organizerEmail.empty())
+    while (true)
     {
-        confirmExit();
-        return;
+        currentUser.organizerEmail = getValidEmailAddress("Enter Organizer Email Address  (must small capital letter with @XXX.com): ");
+        if (currentUser.organizerEmail.empty())
+        {
+            confirmExit();
+            return;
+        }
+        // check duplicate email
+        if (IsIdDuplicateEmail(currentUser.organizerEmail)) { //check from the file
+            cout << "This email has already been taken! Please enter 0 to stop and try to login! " << endl;
+        }
+        else
+        {
+            break;
+        }
+        
     }
 
     // Password
@@ -202,12 +221,24 @@ void loginUser(SystemData& data, bool *validation) {
     }
 }
 
-bool IsIdDuplicate(const string& userID) {
+bool IsIdDuplicateEmail(const string& email) {
     vector<Organizer> users;
     loadUserFromFile(users);
 
     for (const auto& user : users) {
-        if (user.userID == userID) {
+        if (user.organizerEmail == email) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool IsIdDuplicatePhoneNumber(const string& phoneNo) {
+    vector<Organizer> users;
+    loadUserFromFile(users);
+
+    for (const auto& user : users) {
+        if (user.organizerContact == phoneNo) {
             return true;
         }
     }
@@ -271,25 +302,26 @@ void viewUserProfile(SystemData& data) {
     cout << "\n=== MY EVENT STATISTICS ===" << endl;
     cout << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
 
-    // Count user's registrations by status
+    // Count user's registrations by status - UPDATED TO MATCH ACTUAL STATUS NAMES
     int totalRegistrations = 0;
-    int pendingRegistrations = 0;
+    int unscheduledRegistrations = 0;
     int scheduledRegistrations = 0;
-    int rejectedRegistrations = 0;
+    int cancelledRegistrations = 0;
 
     for (const auto& reg : data.registrations) {
         if (reg.organizer.userID == data.currentUser) {
             totalRegistrations++;
-            if (reg.eventStatus == "UNSCHEDULED") pendingRegistrations++;
-            else if (reg.eventStatus == "SCHEDULED" || reg.eventStatus == "REGISTERED") scheduledRegistrations++;
-            else if (reg.eventStatus == "CANCELLED") rejectedRegistrations++;
+            if (reg.eventStatus == "UNSCHEDULED") unscheduledRegistrations++;
+            else if (reg.eventStatus == "SCHEDULED") scheduledRegistrations++;
+            else if (reg.eventStatus == "CANCELLED") cancelledRegistrations++;
         }
     }
 
-    // Count user's bookings by status
+    // Count user's bookings by status - UPDATED TO MATCH ACTUAL STATUS NAMES
     int totalBookings = 0;
     int pendingBookings = 0;
-    int confirmedBookings = 0;
+    int updatedBookings = 0;
+    int approvedBookings = 0;
     int completedBookings = 0;
     int cancelledBookings = 0;
     double totalSpent = 0.0;
@@ -302,7 +334,8 @@ void viewUserProfile(SystemData& data) {
             }
 
             if (booking.bookingStatus == "Pending") pendingBookings++;
-            else if (booking.bookingStatus == "Confirmed") confirmedBookings++;
+            else if (booking.bookingStatus == "Updated") updatedBookings++;
+            else if (booking.bookingStatus == "Approved") approvedBookings++;
             else if (booking.bookingStatus == "Completed") completedBookings++;
             else if (booking.bookingStatus == "Cancelled") cancelledBookings++;
         }
@@ -324,17 +357,18 @@ void viewUserProfile(SystemData& data) {
         averageRating = totalRatings / totalFeedbacks;
     }
 
-    // Display statistics
+    // Display statistics - UPDATED LABELS
     cout << "\n--- EVENT REGISTRATIONS ---" << endl;
     cout << left << setw(20) << "Total Registrations:" << totalRegistrations << endl;
-    cout << left << setw(20) << "Pending:" << pendingRegistrations << endl;
-    cout << left << setw(20) << "Approved:" << scheduledRegistrations << endl;
-    cout << left << setw(20) << "Rejected:" << rejectedRegistrations << endl;
+    cout << left << setw(20) << "UNSCHEDULED:" << unscheduledRegistrations << endl;
+    cout << left << setw(20) << "SCHEDULED:" << scheduledRegistrations << endl;
+    cout << left << setw(20) << "CANCELLED:" << cancelledRegistrations << endl;
 
     cout << "\n--- EVENT BOOKINGS ---" << endl;
     cout << left << setw(20) << "Total Bookings:" << totalBookings << endl;
     cout << left << setw(20) << "Pending:" << pendingBookings << endl;
-    cout << left << setw(20) << "Confirmed:" << confirmedBookings << endl;
+    cout << left << setw(20) << "Updated:" << updatedBookings << endl;
+    cout << left << setw(20) << "Approved:" << approvedBookings << endl;
     cout << left << setw(20) << "Completed:" << completedBookings << endl;
     cout << left << setw(20) << "Cancelled:" << cancelledBookings << endl;
     cout << left << setw(20) << "Total Spent:" << "RM " << fixed << setprecision(2) << totalSpent << endl;
@@ -408,7 +442,7 @@ void editUserProfile(SystemData& data) {
     cout << "6. Position" << endl;
     cout << "7. Cancel" << endl;
 
-    int choice = getValidIntegerInput("Enter your choice [1-5]: ", 1, 5);
+    int choice = getValidIntegerInput("Enter your choice [1-7]: ", 1, 7);
 
     switch (choice) {
     case 1:
@@ -462,15 +496,20 @@ void changeUserPassword(SystemData& data) {
     }
 
     // Verify current password
-    string currentPassword = getValidStringInput("Enter current password: ");
+    string currentPassword = getValidPassword("Enter current password: ");
+    if (currentPassword == "")
+    {
+        confirmExit();
+        return;
+    }
     if (currentPassword != data.organizer[userIndex].password) {
         cout << "Incorrect current password!" << endl;
         return;
     }
 
     // Get new password
-    string newPassword = getValidStringInput("Enter new password: ");
-    string confirmPassword = getValidStringInput("Confirm new password: ");
+    string newPassword = getValidPassword("Enter new password: ");
+    string confirmPassword = getValidPassword("Confirm new password: ");
 
     if (newPassword != confirmPassword) {
         cout << "Password confirmation does not match!" << endl;

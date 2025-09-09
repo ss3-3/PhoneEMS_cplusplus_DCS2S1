@@ -33,7 +33,7 @@ void eventBookingMenu(SystemData& data) {
         cout << "1. Create New Event Booking" << endl;
         cout << "2. View My Event Bookings" << endl;
         cout << "3. Update Event Booking" << endl;
-        cout << "4. Cancel Event Booking" << endl;
+        cout << "4. Cancel / Delete Event Booking" << endl;
         cout << "5. Back to Main Menu" << endl;
         cout << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
 
@@ -603,7 +603,7 @@ void cancelEventBooking(SystemData& data) {
     }
 
     if (!hasBookings) {
-        cout << "You have no event bookings to cancel." << endl;
+        cout << "You have no event bookings to cancel/delete." << endl;
         return;
     }
 
@@ -624,7 +624,7 @@ void cancelEventBooking(SystemData& data) {
     }
 
     if (bookingIndex == -1) {
-        cout << "Event booking not found or you don't have permission to cancel it!" << endl;
+        cout << "Event booking not found or you don't have permission to cancel/delete it!" << endl;
         return;
     }
 

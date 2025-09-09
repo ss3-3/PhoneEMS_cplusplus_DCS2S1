@@ -25,7 +25,8 @@ class SystemData;
 void signUp(SystemData& data);
 void loginUser(SystemData& data, bool *validation);
 void displayUserInfo(const Organizer& organizer);
-bool IsIdDuplicate(const string& userID);
+bool IsIdDuplicateEmail(const string& email);
+bool IsIdDuplicatePhoneNumber(const string& phoneNo);
 
 void viewUserProfile(SystemData& data);
 void editUserProfile(SystemData& data);

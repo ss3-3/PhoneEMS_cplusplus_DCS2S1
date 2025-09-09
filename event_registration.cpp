@@ -30,7 +30,7 @@ void eventRegistrationMenu(SystemData& data) {
         cout << "1. Create New Event Registration" << endl;
         cout << "2. View My Event Registrations" << endl;
         cout << "3. Update Event Registration" << endl;
-        cout << "4. Delete Event Registration" << endl;
+        cout << "4. Cancel / Delete Event Registration" << endl;
         cout << "5. Back to Main Menu" << endl;
         cout << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
 
@@ -327,96 +327,213 @@ void viewEventRegistrations(const SystemData& data) {
 }
 
 void editPhoneInfo(EventRegistration* regPtr) {
-    string checkPhoneModel, newName, newModel, newPrice;
-    double newPriceDouble;
+    //string checkPhoneModel, newName, newModel, newPrice;
+    //double newPriceDouble;
 
-    checkPhoneModel = getValidStringInputWithExit("Enter the phone model you want to update: ");
-    if (checkPhoneModel.empty()) return;
+    //checkPhoneModel = getValidStringInputWithExit("Enter the phone model you want to update: ");
+    //if (checkPhoneModel.empty()) return;
 
-    bool found = false;
-    for (auto& phone : regPtr->phoneInfo) {
-        if (phone.productModel == checkPhoneModel) {
-            found = true;
+    //bool found = false;
+    //for (auto& phone : regPtr->phoneInfo) {
+    //    if (phone.productModel == checkPhoneModel) {
+    //        found = true;
 
-            cout << "Current Name: " << phone.productName << endl;
+    //        cout << "Current Name: " << phone.productName << endl;
+    //        cout << "Current Model: " << phone.productModel << endl;
+    //        cout << "Current Price: RM" << phone.productPrice << endl;
+
+    //        // Phone name
+    //        newName = getValidStringInputOrKeepCurrent("\nEnter new name: ");
+    //        if (newName == "EXIT_REQUESTED") return;
+    //        if (newName != "KEEP_CURRENT") phone.productName = newName;
+
+    //        // Phone Model
+    //        newModel = getValidStringInputOrKeepCurrent("\nEnter new model: ");
+    //        if (newModel == "EXIT_REQUESTED") return;
+    //        if (newModel != "KEEP_CURRENT") phone.productModel = newModel;
+
+    //        // Phone price - FIX THE EXCEPTION HERE
+    //        cout << endl << "Enter new price (or press Enter to keep current): ";
+    //        getline(cin, newPrice);
+
+    //        if (newPrice == "0") {
+    //            if (getExit()) return;
+    //        }
+    //        else if (!newPrice.empty()) {
+    //            // Add proper exception handling for stod()
+    //            try {
+    //                // Trim whitespace first
+    //                size_t start = newPrice.find_first_not_of(" \t");
+    //                if (start != string::npos) {
+    //                    size_t end = newPrice.find_last_not_of(" \t");
+    //                    newPrice = newPrice.substr(start, end - start + 1);
+    //                }
+
+    //                // Validate that it's a valid number format before conversion
+    //                bool isValidFormat = true;
+    //                bool hasDecimal = false;
+
+    //                for (size_t i = 0; i < newPrice.length(); i++) {
+    //                    if (newPrice[i] == '.') {
+    //                        if (hasDecimal) {
+    //                            isValidFormat = false;
+    //                            break;
+    //                        }
+    //                        hasDecimal = true;
+    //                    }
+    //                    else if (!isdigit(newPrice[i])) {
+    //                        isValidFormat = false;
+    //                        break;
+    //                    }
+    //                }
+
+    //                if (!isValidFormat || newPrice.empty() || newPrice == ".") {
+    //                    cout << "Invalid price format. Keeping current price." << endl;
+    //                }
+    //                else {
+    //                    newPriceDouble = stod(newPrice);
+    //                    if (newPriceDouble > 0) {
+    //                        phone.productPrice = newPriceDouble;
+    //                        cout << fixed << setprecision(2);  // display 2 decimal format
+    //                        cout << "New price set to RM " << phone.productPrice << endl;
+    //                    }
+    //                    else {
+    //                        cout << "Price must be greater than 0. Keeping current price." << endl;
+    //                    }
+    //                }
+    //            }
+    //            catch (const std::invalid_argument& e) {
+    //                cout << "Invalid price format. Keeping current price." << endl;
+    //            }
+    //            catch (const std::out_of_range& e) {
+    //                cout << "Price value is too large. Keeping current price." << endl;
+    //            }
+    //            catch (const std::exception& e) {
+    //                cout << "Error processing price. Keeping current price." << endl;
+    //            }
+    //        }
+
+    //        cout << endl << "Phone updated successfully!" << endl;
+    //        break;
+    //    }
+    //}
+    //if (!found) {
+    //    cout << "No phone found with model " << checkPhoneModel << endl;
+    //}
+    bool validation = false;
+    if (regPtr->phoneInfo.empty()) {
+        cout << "No phones registered for this event." << endl;
+        return;
+    }
+
+    while (!validation) {
+        cout << "\n=== PHONE INFORMATION ===" << endl;
+        int i = 1;
+        for (const auto& phone : regPtr->phoneInfo) {
+            cout << "-------------------" << endl;
+            cout << "Phone " << i << ": " << endl;
+            cout << "  Name : " << phone.productName << endl;
+            cout << "  Model: " << phone.productModel << endl;
+            cout << "  Price: RM " << fixed << setprecision(2) << phone.productPrice << endl;
+            i++;
+        }
+
+        cout << "\nWhat would you like to do?" << endl;
+        cout << "1. Add a new phone" << endl;
+        cout << "2. Edit an existing phone" << endl;
+        cout << "3. Delete a phone" << endl;
+        cout << "4. Back" << endl;
+
+        int choice = getValidIntegerInput("Enter choice [1-4]: ", 1, 4);
+        switch (choice) {
+        case 1:
+        {
+            string productName = getValidStringInputWithExit("Enter product name: ");
+            if (productName.empty()) {
+                confirmExit();
+                return;
+            }
+            string productModel = getValidStringInputWithExit("Enter product model: ");
+            if (productModel.empty()) {
+                confirmExit();
+                return;
+            }
+            double productPrice = getValidDoubleInputWithExit("Enter product price (RM): ", 5);
+            if (productPrice == -1.0) {
+                confirmExit();
+                return;
+            }
+
+            // Ensure valid price before assignment
+            if (productPrice < 0) {
+                cout << "Error: Invalid product price!" << endl;
+                confirmExit();
+                return;
+            }
+
+            regPtr->phoneInfo.push_back({ productName, productModel, productPrice });
+
+            regPtr->productQuantity = regPtr->phoneInfo.size();
+            cout << "Phone added successfully!" << endl;
+            break;
+        }
+        case 2:
+        {
+            int index = getValidIntegerInput("Enter phone number to edit: ", 1, regPtr->phoneInfo.size());
+            auto& phone = regPtr->phoneInfo[index - 1];
+
+            cout << "Editing Phone " << index << endl;
+            cout << "Current Name : " << phone.productName << endl;
             cout << "Current Model: " << phone.productModel << endl;
-            cout << "Current Price: RM" << phone.productPrice << endl;
+            cout << "Current Price: RM " << phone.productPrice << endl;
 
-            // Phone name
-            newName = getValidStringInputOrKeepCurrent("\nEnter new name: ");
+            // Name
+            string newName = getValidStringInputOrKeepCurrent("\nEnter new name: ");
             if (newName == "EXIT_REQUESTED") return;
             if (newName != "KEEP_CURRENT") phone.productName = newName;
 
-            // Phone Model
-            newModel = getValidStringInputOrKeepCurrent("\nEnter new model: ");
+            // Model
+            string newModel = getValidStringInputOrKeepCurrent("\nEnter new model: ");
             if (newModel == "EXIT_REQUESTED") return;
             if (newModel != "KEEP_CURRENT") phone.productModel = newModel;
 
-            // Phone price - FIX THE EXCEPTION HERE
+            // Price
+            string newPrice;
             cout << endl << "Enter new price (or press Enter to keep current): ";
             getline(cin, newPrice);
-
-            if (newPrice == "0") {
-                if (getExit()) return;
-            }
-            else if (!newPrice.empty()) {
-                // Add proper exception handling for stod()
+            if (!newPrice.empty()) {
                 try {
-                    // Trim whitespace first
-                    size_t start = newPrice.find_first_not_of(" \t");
-                    if (start != string::npos) {
-                        size_t end = newPrice.find_last_not_of(" \t");
-                        newPrice = newPrice.substr(start, end - start + 1);
-                    }
-
-                    // Validate that it's a valid number format before conversion
-                    bool isValidFormat = true;
-                    bool hasDecimal = false;
-
-                    for (size_t i = 0; i < newPrice.length(); i++) {
-                        if (newPrice[i] == '.') {
-                            if (hasDecimal) {
-                                isValidFormat = false;
-                                break;
-                            }
-                            hasDecimal = true;
-                        }
-                        else if (newPrice[i] < '0' || newPrice[i] > '9') {
-                            isValidFormat = false;
-                            break;
-                        }
-                    }
-
-                    if (!isValidFormat || newPrice.empty() || newPrice == ".") {
-                        cout << "Invalid price format. Keeping current price." << endl;
+                    double newPriceDouble = stod(newPrice);
+                    if (newPriceDouble > 0) {
+                        phone.productPrice = newPriceDouble;
+                        cout << "Price updated successfully!" << endl;
                     }
                     else {
-                        newPriceDouble = stod(newPrice);
-                        if (newPriceDouble > 0) {
-                            phone.productPrice = newPriceDouble;
-                        }
-                        else {
-                            cout << "Price must be greater than 0. Keeping current price." << endl;
-                        }
+                        cout << "Invalid price. Keeping current." << endl;
                     }
                 }
-                catch (const std::invalid_argument& e) {
-                    cout << "Invalid price format. Keeping current price." << endl;
-                }
-                catch (const std::out_of_range& e) {
-                    cout << "Price value is too large. Keeping current price." << endl;
-                }
-                catch (const std::exception& e) {
-                    cout << "Error processing price. Keeping current price." << endl;
+                catch (...) {
+                    cout << "Invalid input. Keeping current price." << endl;
                 }
             }
 
-            cout << endl << "Phone updated successfully!" << endl;
+            cout << "Phone updated successfully!" << endl;
             break;
         }
-    }
-    if (!found) {
-        cout << "No phone found with model " << checkPhoneModel << endl;
+        case 3:
+        {
+            int index = getValidIntegerInput("Enter phone number to delete: ", 1, regPtr->phoneInfo.size());
+            cout << "Deleting Phone " << index << " (" << regPtr->phoneInfo[index - 1].productModel << ")" << endl;
+            regPtr->phoneInfo.erase(regPtr->phoneInfo.begin() + (index - 1));
+            regPtr->productQuantity = regPtr->phoneInfo.size(); // change the quantity
+            cout << "Phone deleted successfully!" << endl;
+
+            break;
+        }
+        case 4:
+            validation = true;
+            break;
+        }
     }
 }
 
@@ -505,15 +622,14 @@ void updateEventRegistration(SystemData& data) {
 
     cout << "\nWhat would you like to update?" << endl;
     cout << "1. Event Title" << endl;
-    cout << "2. Product Launch Quantity" << endl;
-    cout << "3. Phone Model" << endl;
-    cout << "4. Manufacturer" << endl;
-    cout << "5. Description" << endl;
-    cout << "6. Maximum Participants" << endl;
-    cout << "7. Estimated Budget" << endl;
-    cout << "8. Cancel Modify" << endl;
+    cout << "2. Phone Model" << endl;
+    cout << "3. Manufacturer" << endl;
+    cout << "4. Description" << endl;
+    cout << "5. Maximum Participants" << endl;
+    cout << "6. Estimated Budget" << endl;
+    cout << "7. Cancel Modify" << endl;
 
-    int choice = getValidIntegerInput("Enter choice [1-8]: ", 1, 8);
+    int choice = getValidIntegerInput("Enter choice [1-7]: ", 1, 7);
 
     switch (choice) {
     case 1: {
@@ -523,32 +639,28 @@ void updateEventRegistration(SystemData& data) {
         break;
     }
     case 2: {
-        regPtr->productQuantity = getValidIntegerInput("Enter new quantity: ", 1, 20);
-        break;
-    }
-    case 3: {
         editPhoneInfo(regPtr);
         break;
     }
-    case 4: {
+    case 3: {
         string newManufacturer = getValidStringInputWithExit("Enter new Manufacturer: ");
         if (newManufacturer.empty()) return;
         regPtr->manufacturer = newManufacturer;
         break;
     }
-    case 5: {
+    case 4: {
         string newDescription = getValidStringInputWithExit("Enter new Description: ");
         if (newDescription.empty()) return;
         regPtr->description = newDescription;
         break;
     }
-    case 6:
+    case 5:
         regPtr->expectedGuests = getValidIntegerInput("Enter new Expected Guests (100-1200): ", 100, 1200);
         break;
-    case 7:
+    case 6:
         regPtr->estimatedBudget = getValidDoubleInput("Enter new Estimated Budget (RM): ");
         break;
-    case 8:
+    case 7:
         break;
     }
 
@@ -558,7 +670,7 @@ void updateEventRegistration(SystemData& data) {
 
 void deleteEventRegistration(SystemData& data) {
     clearScreen();
-    cout << "=== CANCEL EVENT REGISTRATION ===" << endl;
+    cout << "=== CANCEL/DELETE EVENT REGISTRATION ===" << endl;
 
     // Check if user is logged in
     if (data.currentUser.empty()) {
@@ -578,12 +690,12 @@ void deleteEventRegistration(SystemData& data) {
     }
 
     if (!hasRegistrations) {
-        cout << "You have no event registrations to cancel." << endl;
+        cout << "You have no event registrations to cancel/delete." << endl;
         return;
     }
 
     viewEventRegistrations(data);
-    string eventID = getValidStringInput("\nEnter Event ID to cancel: ");
+    string eventID = getValidStringInput("\nEnter Event ID to cancel/delete: ");
     if (eventID.empty()) return;
     eventID = toUpperCase(eventID);
 
@@ -599,13 +711,7 @@ void deleteEventRegistration(SystemData& data) {
     }
 
     if (regIndex == -1) {
-        cout << "Event registration not found or you don't have permission to cancel it!" << endl;
-        return;
-    }
-
-    // Check if event is already cancelled
-    if (data.registrations[regIndex].eventStatus == "CANCELLED") {
-        cout << "This event is already cancelled!" << endl;
+        cout << "Event registration not found or you don't have permission to cancel/delete it!" << endl;
         return;
     }
 
@@ -616,11 +722,42 @@ void deleteEventRegistration(SystemData& data) {
     cout << "Organizer: " << data.registrations[regIndex].organizer.organizerName << endl;
     cout << "Current Status: " << data.registrations[regIndex].eventStatus << endl;
 
+    if (data.registrations[regIndex].eventStatus == "CANCELLED") {
+        cout << "This event is already CANCELLED. " << endl;
+        vector<char> validChars = { 'Y', 'N' };
+        char confirmDel = getValidCharInput("Do you want to permanently delete this event? (Y/N): ", validChars);
+
+        if (confirmDel == 'Y') {
+            string eventIDToDelete = data.registrations[regIndex].eventID;
+
+            // delete event
+            data.registrations.erase(data.registrations.begin() + regIndex);
+
+            // delete related bookings
+            for (size_t i = 0; i < data.bookings.size(); ) {
+                if (data.bookings[i].eventReg.eventID == eventIDToDelete) {
+                    data.bookings.erase(data.bookings.begin() + i);
+                }
+                else {
+                    i++;
+                }
+            }
+
+            saveRegistrationsToFile(data.registrations);
+            saveBookingsToFile(data.bookings);
+
+            cout << "Event and all related bookings deleted permanently!" << endl;
+        }
+        else {
+            cout << "Delete aborted." << endl;
+        }
+        return;
+    }
     // Check if registration has active bookings
     vector<int> affectedBookings;
     for (size_t i = 0; i < data.bookings.size(); i++) {
         if (data.bookings[i].eventReg.eventID == eventID &&
-            data.bookings[i].bookingStatus != "CANCELLED") {
+            data.bookings[i].bookingStatus != "Cancelled") {
             affectedBookings.push_back(i);
         }
     }
@@ -635,14 +772,15 @@ void deleteEventRegistration(SystemData& data) {
     vector<char> validChars = { 'Y', 'N' };
     char confirm = getValidCharInput("\nDo you really want to cancel this event? (Y/N): ", validChars);
 
-    if (confirm == 'Y' || confirm == 'y') {
+    // Cancel event process
+    if (confirm == 'Y') {
         // Cancel the event registration
         data.registrations[regIndex].eventStatus = "CANCELLED";
 
         // Cancel all active bookings for this event
         int cancelledBookings = 0;
         for (int bookingIndex : affectedBookings) {
-            data.bookings[bookingIndex].bookingStatus = "CANCELLED";
+            data.bookings[bookingIndex].bookingStatus = "Cancelled";
             cancelledBookings++;
         }
 
@@ -654,6 +792,19 @@ void deleteEventRegistration(SystemData& data) {
         if (cancelledBookings > 0) {
             cout << cancelledBookings << " booking(s) have been automatically cancelled." << endl;
             cout << "Affected users will be notified when they view their bookings." << endl;
+        }
+
+        // After successful cancellation, ask if user wants to delete (RECURSION method)
+        cout << "\nThe event is now CANCELLED. Would you like to permanently delete it?" << endl;
+        char deleteConfirm = getValidCharInput("Delete this cancelled event? (Y/N): ", validChars);
+
+        if (deleteConfirm == 'Y') {
+            cout << "\nProceeding to delete the cancelled event..." << endl;
+            // Recursive call to handle the deletion of the now-cancelled event
+            deleteEventRegistration(data);
+        }
+        else {
+            cout << "Event remains cancelled but not deleted." << endl;
         }
     }
     else {
