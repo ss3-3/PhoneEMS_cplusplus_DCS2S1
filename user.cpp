@@ -67,11 +67,22 @@ void signUp(SystemData& data) {
         confirmExit();
         return;
     }
-    currentUser.organizerContact = getValidPhoneNumber("Enter Organizer Contact: ");
-    if (currentUser.organizerContact.empty())
-    {
-        confirmExit();
-        return;
+    while (true) {
+        currentUser.organizerContact = getValidPhoneNumber("Enter Organizer Contact: ");
+        if (currentUser.organizerContact.empty())
+        {
+            confirmExit();
+            return;
+        }
+        //check duplicated phone number
+        if (IsIdDuplicatePhoneNumber(currentUser.organizerContact))
+        {
+            cout << "This phone number has already registered! Please enter 0 to stop and try to login! " << endl;
+        }
+        else
+        {
+            break; // exit while loop
+        }
     }
     while (true)
     {
@@ -83,7 +94,7 @@ void signUp(SystemData& data) {
         }
         // check duplicate email
         if (IsIdDuplicateEmail(currentUser.organizerEmail)) { //check from the file
-            cout << "This email has already been taken! Please try to login! " << endl;
+            cout << "This email has already been taken! Please enter 0 to stop and try to login! " << endl;
         }
         else
         {
@@ -216,6 +227,18 @@ bool IsIdDuplicateEmail(const string& email) {
 
     for (const auto& user : users) {
         if (user.organizerEmail == email) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool IsIdDuplicatePhoneNumber(const string& phoneNo) {
+    vector<Organizer> users;
+    loadUserFromFile(users);
+
+    for (const auto& user : users) {
+        if (user.organizerContact == phoneNo) {
             return true;
         }
     }
@@ -473,15 +496,20 @@ void changeUserPassword(SystemData& data) {
     }
 
     // Verify current password
-    string currentPassword = getValidStringInput("Enter current password: ");
+    string currentPassword = getValidPassword("Enter current password: ");
+    if (currentPassword == "")
+    {
+        confirmExit();
+        return;
+    }
     if (currentPassword != data.organizer[userIndex].password) {
         cout << "Incorrect current password!" << endl;
         return;
     }
 
     // Get new password
-    string newPassword = getValidStringInput("Enter new password: ");
-    string confirmPassword = getValidStringInput("Confirm new password: ");
+    string newPassword = getValidPassword("Enter new password: ");
+    string confirmPassword = getValidPassword("Confirm new password: ");
 
     if (newPassword != confirmPassword) {
         cout << "Password confirmation does not match!" << endl;
