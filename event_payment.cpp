@@ -16,11 +16,6 @@
 
 using namespace std;
 
-const int CARD_NUMBER_LENGTH = 16;
-const int CVV_LENGTH = 3;
-const int REFUND_PROCESS_DAYS = 7;
-const double PROMO_DISCOUNT = 0.10;
-
 void eventPaymentMenu(SystemData& data) {
     bool exitMenu = false;
 
@@ -63,6 +58,8 @@ void eventPaymentMenu(SystemData& data) {
 }
 
 void makePayment(SystemData& data) {
+    const double PROMO_DISCOUNT = 0.10;
+    
     clearScreen();
     cout << "=== MAKE PAYMENT ===" << endl;
     cout << format("{:=<50}", "") << endl;
@@ -181,7 +178,7 @@ void makePayment(SystemData& data) {
 
         string fullCardNumber;
         while (true) {
-            cout << "Enter card number (" << CARD_NUMBER_LENGTH << " digits): ";
+            cout << "Enter card number (16 digits): ";
             getline(cin, fullCardNumber);
 
             // Remove spaces
@@ -190,7 +187,7 @@ void makePayment(SystemData& data) {
                 if (c != ' ') cleanCard += c;
             }
 
-            if (cleanCard.length() == CARD_NUMBER_LENGTH) {
+            if (cleanCard.length() == 16) {
                 bool allDigits = true;
                 for (char c : cleanCard) {
                     if (c < '0' || c > '9') {
@@ -204,7 +201,7 @@ void makePayment(SystemData& data) {
                     break;
                 }
             }
-            cout << "Invalid card number. Please enter " << CARD_NUMBER_LENGTH << " digits." << endl;
+            cout << "Invalid card number. Please enter 16 digits." << endl;
         }
 
         newPayment.cardHolderName = getValidStringInput("Enter cardholder name: ", 2);
@@ -213,7 +210,7 @@ void makePayment(SystemData& data) {
         string expiryDate;
         getline(cin, expiryDate);
 
-        cout << "Enter CVV (" << CVV_LENGTH << " digits): ";
+        cout << "Enter CVV (3 digits): ";
         string cvv;
         getline(cin, cvv);
 
@@ -389,7 +386,7 @@ void processRefund(SystemData& data) {
 
         cout << "\n=== REFUND PROCESSED ===" << endl;
         cout << format("Refund amount: RM {:.2f}", selectedPayment.amount) << endl;
-        cout << "Processing time: " << REFUND_PROCESS_DAYS << " business days" << endl;
+        cout << "Processing time: 5-7 business days" << endl;
         cout << "Refund method: Original payment method" << endl;
 
         if (!selectedPayment.cardNumber.empty()) {
