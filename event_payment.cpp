@@ -124,21 +124,20 @@ void makePayment(SystemData& data) {
     EventBooking selectedBooking = unpaidBookings[bookingChoice - 1];
 
      // Promo code (optional)
- cout << "\nDo you have a promo code? (Enter or leave blank): ";
- string promoCode;
- getline(cin, promoCode);
+     cout << "\nDo you have a promo code? (Enter or leave blank): ";
+     string promoCode;
+     getline(cin, promoCode);
 
- // Apply discount if valid
- double finalAmount = selectedBooking.finalCost;
- if (!promoCode.empty()) {
-     if (promoCode == "PROMO10") { // Example valid promo
-         cout << "Promo code applied! You get 10% discount." << endl;
-         finalAmount = finalAmount * (1.0 - PROMO_DISCOUNT);
+     // Apply discount if valid
+     if (!promoCode.empty()) {
+         if (promoCode == "PROMO10") { // Example valid promo
+             cout << "Promo code applied! You get 10% discount." << endl;
+             selectedBooking.finalCost *= (1.0 - PROMO_DISCOUNT);
+         }
+         else {
+             cout << "Invalid promo code. No discount applied." << endl;
+         }
      }
-     else {
-         cout << "Invalid promo code. No discount applied." << endl;
-     }
- }
 
     // Create payment record
     Payment newPayment;
@@ -210,9 +209,33 @@ void makePayment(SystemData& data) {
         string expiryDate;
         getline(cin, expiryDate);
 
-        cout << "Enter CVV (3 digits): ";
         string cvv;
-        getline(cin, cvv);
+        while (true) {
+            cout << "Enter CVV (3 digits): ";
+            getline(cin, cvv);
+
+            // Remove spaces
+            string cleanCard = "";
+            for (char c : cvv) {
+                if (c != ' ') cleanCard += c;
+            }
+
+            if (cleanCard.length() == 3) {
+                bool allDigits = true;
+                for (char c : cleanCard) {
+                    if (c < '0' || c > '9') {
+                        allDigits = false;
+                        break;
+                    }
+                }
+                if (allDigits) {
+                    // Store only last 4 digits
+                    cvv = cleanCard;
+                    break;
+                }
+            }
+            cout << "Invalid card number. Please enter 3 digits." << endl;
+        }
 
         cout << "\nProcessing card payment..." << endl;
     }
